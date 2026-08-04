@@ -140,39 +140,7 @@ export default function Home() {
 
       <header className="site-header">
         <div className="site-header-inner">
-          <ExternalLink
-            className="header-huggingface"
-            href="https://huggingface.co/htcwang"
-          >
-            <span className="header-brand-label">
-              <img
-                className="header-brand-logo header-huggingface-logo"
-                src="/brand/huggingface.svg"
-                alt=""
-                width="20"
-                height="20"
-                aria-hidden="true"
-              />
-              <span className="header-brand-text">Hugging Face</span>
-            </span>
-          </ExternalLink>
           <SectionSwitcher />
-          <ExternalLink
-            className="header-github"
-            href="https://github.com/Tianchenggg"
-          >
-            <span className="header-brand-label">
-              <span className="header-github-logo" aria-hidden="true">
-                <img
-                  src="/brand/github-mark.svg"
-                  alt=""
-                  width="15"
-                  height="15"
-                />
-              </span>
-              <span className="header-brand-text">GitHub</span>
-            </span>
-          </ExternalLink>
         </div>
       </header>
 
@@ -214,6 +182,40 @@ export default function Home() {
               <span>Previously at BUPT</span>
             </span>
           </p>
+          <div className="hero-socials" aria-label="Research profiles">
+            <ExternalLink
+              className="hero-social-link hero-huggingface"
+              href="https://huggingface.co/htcwang"
+            >
+              <span className="hero-social-label">
+                <img
+                  className="hero-social-logo hero-huggingface-logo"
+                  src="/brand/huggingface.svg"
+                  alt=""
+                  width="19"
+                  height="19"
+                  aria-hidden="true"
+                />
+                <span>Hugging Face</span>
+              </span>
+            </ExternalLink>
+            <ExternalLink
+              className="hero-social-link hero-github"
+              href="https://github.com/Tianchenggg"
+            >
+              <span className="hero-social-label">
+                <img
+                  className="hero-social-logo hero-github-logo"
+                  src="/brand/github-mark.svg"
+                  alt=""
+                  width="18"
+                  height="18"
+                  aria-hidden="true"
+                />
+                <span>GitHub</span>
+              </span>
+            </ExternalLink>
+          </div>
         </div>
 
         <figure className="hero-portrait">

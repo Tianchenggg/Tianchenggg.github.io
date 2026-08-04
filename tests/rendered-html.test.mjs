@@ -42,10 +42,13 @@ test("server-renders the finished research portfolio", async () => {
   assert.equal(switcherMarkup.match(/>Project</g)?.length, 1);
   assert.match(
     html,
-    /class="header-huggingface"[^>]*href="https:\/\/huggingface\.co\/htcwang"/,
+    /class="hero-social-link hero-huggingface"[^>]*href="https:\/\/huggingface\.co\/htcwang"/,
   );
   assert.match(html, />Hugging Face</);
-  assert.match(html, /class="header-github"[^>]*href="https:\/\/github\.com\/Tianchenggg"/);
+  assert.match(html, /class="hero-social-link hero-github"[^>]*href="https:\/\/github\.com\/Tianchenggg"/);
+  const headerMarkup = html.match(/<header class="site-header"[\s\S]*?<\/header>/)?.[0] ?? "";
+  assert.doesNotMatch(headerMarkup, /Hugging Face|GitHub/);
+  assert.match(headerMarkup, /class="section-switcher"/);
   assert.match(html, /\/brand\/huggingface\.svg/);
   assert.match(html, /\/brand\/github-mark\.svg/);
   assert.match(html, /\/brand\/hust-seal\.jpg/);
@@ -94,16 +97,10 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /--radius-card:\s*24px/);
   assert.match(css, /--muted-light:\s*#5a6f85/i);
   assert.match(css, /aspect-ratio:\s*2\s*\/\s*1/);
-  assert.match(
-    css,
-    /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(286px,\s*348px\)\s+minmax\(0,\s*1fr\)/,
-  );
-  assert.match(
-    css,
-    /\.header-huggingface\s*{[^}]*justify-content:\s*flex-end/s,
-  );
-  assert.match(css, /\.header-github\s*{[^}]*justify-content:\s*flex-start/s);
-  assert.doesNotMatch(css, /grid-row:\s*2/);
+  assert.match(css, /\.site-header-inner\s*{[^}]*display:\s*block[^}]*width:\s*min\(348px,\s*100%\)/s);
+  assert.match(css, /\.hero-socials\s*{/);
+  assert.match(css, /\.hero-huggingface\s*{/);
+  assert.match(css, /\.hero-github\s*{/);
   assert.match(switcher, /aria-current/);
   assert.match(switcher, /requestAnimationFrame/);
   assert.match(switcher, /navigationLock/);
