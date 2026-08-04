@@ -36,7 +36,11 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, />Home</);
   assert.match(html, />Research</);
   assert.match(html, />Project</);
-  assert.match(html, /class="header-identity"[^>]*href="#home"/);
+  assert.match(
+    html,
+    /class="header-huggingface"[^>]*href="https:\/\/huggingface\.co\/htcwang"/,
+  );
+  assert.match(html, />Hugging Face</);
   assert.match(html, /class="header-github"[^>]*href="https:\/\/github\.com\/Tianchenggg"/);
   assert.match(html, /LLM safety/i);
   assert.doesNotMatch(html, /large-model safety/i);

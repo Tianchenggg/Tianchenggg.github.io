@@ -140,13 +140,12 @@ export default function Home() {
 
       <header className="site-header">
         <div className="site-header-inner">
-          <a
-            className="header-identity"
-            href="#home"
-            aria-label="Tiancheng He — Home"
+          <ExternalLink
+            className="header-huggingface"
+            href="https://huggingface.co/htcwang"
           >
-            Tiancheng He
-          </a>
+            Hugging Face
+          </ExternalLink>
           <SectionSwitcher />
           <ExternalLink
             className="header-github"

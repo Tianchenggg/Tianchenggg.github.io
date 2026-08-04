@@ -107,7 +107,7 @@ img {
   width: min(1160px, 100%);
 }
 
-.header-identity,
+.header-huggingface,
 .header-github {
   display: inline-flex;
   min-height: 43px;
@@ -133,7 +133,7 @@ img {
   pointer-events: auto;
 }
 
-.header-identity {
+.header-huggingface {
   justify-self: start;
   letter-spacing: -0.015em;
 }
@@ -143,7 +143,7 @@ img {
   color: var(--accent-deep);
 }
 
-.header-identity:hover,
+.header-huggingface:hover,
 .header-github:hover {
   border-color: rgb(255 255 255 / 0.94);
   background: linear-gradient(
@@ -213,7 +213,7 @@ img {
 }
 
 .section-switcher a:focus-visible,
-.header-identity:focus-visible,
+.header-huggingface:focus-visible,
 .header-github:focus-visible,
 .publication-links a:focus-visible,
 .project-link:focus-visible {
@@ -667,7 +667,7 @@ a:focus-visible .link-arrow {
     gap: 6px 10px;
   }
 
-  .header-identity,
+  .header-huggingface,
   .header-github {
     min-height: 33px;
     padding: 0 11px;
