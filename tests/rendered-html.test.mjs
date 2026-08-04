@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, stat } from "node:fs/promises";
 import test from "node:test";
 
 function cssBlock(source, marker) {
@@ -92,7 +92,7 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, /Activation Revelation/);
   assert.match(html, /<h2>Project<\/h2>/);
   assert.match(html, /<h3>Activation Revelation<\/h3>/);
-  assert.match(html, /tiancheng-he-cutout-v2\.png/);
+  assert.match(html, /tiancheng-he-portrait-800\.webp/);
   assert.doesNotMatch(html, /RareAlert/);
   assert.doesNotMatch(html, /Two questions guide my work|Research should leave the lab/);
   assert.doesNotMatch(
@@ -132,8 +132,8 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /min-height:\s*100svh/);
   assert.match(css, /@supports\s*\(animation-timeline:\s*view\(\)\)/);
   assert.match(css, /animation-timeline:\s*view\(block\)/);
-  assert.match(css, /animation-range:[\s\S]*cover 0% cover 34%,[\s\S]*cover 0% cover 100%/);
-  assert.match(css, /@keyframes\s+research-card-arrive/);
+  assert.match(css, /animation-range:\s*cover 0% cover 100%/);
+  assert.doesNotMatch(css, /@keyframes\s+research-card-arrive/);
   assert.match(css, /@keyframes\s+research-card-focus/);
   assert.match(css, /@keyframes\s+research-heading-focus/);
   assert.match(css, /@keyframes\s+hero-deemphasize/);
@@ -152,6 +152,19 @@ test("ships the GitHub Pages export and social assets", async () => {
   const baseCardRule = cssBlock(css, ".publication-card {");
   assert.match(baseCardRule, /filter:\s*none/);
   assert.match(baseCardRule, /opacity:\s*1/);
+  assert.match(baseCardRule, /contain:\s*paint/);
+  assert.doesNotMatch(baseCardRule, /backdrop-filter/);
+
+  const projectPanelRule = cssBlock(css, ".project-panel {");
+  assert.doesNotMatch(projectPanelRule, /backdrop-filter/);
+
+  const cardFocusFrames = cssBlock(css, "@keyframes research-card-focus");
+  assert.match(cardFocusFrames, /transform:\s*translate3d/);
+  assert.doesNotMatch(cardFocusFrames, /scale:/);
+
+  const heroFrames = cssBlock(css, "@keyframes hero-deemphasize");
+  assert.match(heroFrames, /opacity:/);
+  assert.doesNotMatch(heroFrames, /scale:|transform:/);
 
   const viewTimelineRules = cssBlock(css, "@supports (animation-timeline: view())");
   assert.match(
@@ -160,7 +173,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   );
   assert.match(
     viewTimelineRules,
-    /\.publication-card\s*{[^}]*research-card-arrive linear both,[^}]*research-card-focus linear both[^}]*cover 0% cover 34%,[^}]*cover 0% cover 100%/s,
+    /\.publication-card\s*{[^}]*animation:\s*research-card-focus linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*cover 0% cover 100%/s,
   );
   assert.match(viewTimelineRules, /\.publication-card:focus-within\s*{[^}]*opacity:\s*1\s*!important/s);
   assert.match(viewTimelineRules, /\.publication-card:hover\s*{[^}]*opacity:\s*1\s*!important/s);
@@ -181,10 +194,16 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(switcher, /section-switcher-drag-handle/);
   assert.match(switcher, /--drag-x/);
   assert.match(switcher, /previewIndex/);
+  assert.match(switcher, /ResizeObserver/);
+  assert.match(switcher, /sectionTops/);
+  assert.match(switcher, /activeIndexRef/);
+  assert.doesNotMatch(switcher, /--lens-light-x/);
   assert.doesNotMatch(switcher, /section-switcher-lens-labels|--drag-label-x/);
-  assert.match(css, /backdrop-filter:\s*blur\(22px\)\s+saturate\(138%\)/);
+  assert.match(css, /backdrop-filter:\s*blur\(14px\)\s+saturate\(125%\)/);
   assert.match(css, /cubic-bezier\(0\.22,\s*1,\s*0\.36,\s*1\)/);
   assert.match(css, /scale\(1\.018\)/);
+  assert.doesNotMatch(css, /font-weight\s+170ms/);
+  assert.doesNotMatch(css, /--lens-light-x/);
   assert.doesNotMatch(css, /section-switcher-lens-labels|--drag-label-x/);
   assert.match(css, /\.section-switcher-drag-handle/);
   assert.doesNotMatch(css, /will-change:\s*transform/);
@@ -192,27 +211,44 @@ test("ships the GitHub Pages export and social assets", async () => {
   const thumbRule = css.match(/\.section-switcher-thumb\s*{([^}]*)}/s)?.[1] ?? "";
   assert.doesNotMatch(thumbRule, /backdrop-filter/);
   assert.match(css, /\.section-switcher\.is-dragging/);
-  assert.match(page, /\/figures\/rarelens\.png/);
-  assert.match(page, /\/figures\/vcu-llm\.png/);
-  assert.match(page, /\/figures\/safer-steer\.png/);
-  assert.match(page, /\/figures\/safer-toolkit\.png/);
-  assert.match(page, /\/figures\/livesearchbench\.png/);
+  assert.match(page, /loading="lazy"/);
+  assert.match(page, /decoding="async"/);
+  assert.doesNotMatch(page, /loading=\{index === 0/);
+  assert.match(page, /\/images\/paper-rarelens-1000\.webp/);
+  assert.match(page, /\/images\/paper-vcu-llm-1000\.webp/);
+  assert.match(page, /\/images\/paper-safer-steer-1000\.webp/);
+  assert.match(page, /\/images\/paper-safer-toolkit-1000\.webp/);
+  assert.match(page, /\/images\/paper-livesearchbench-1000\.webp/);
+  assert.match(page, /imageWidth:\s*1000/);
+  assert.match(page, /imageHeight:/);
+  assert.doesNotMatch(page, /\/figures\/.+\.png/);
   assert.doesNotMatch(page, /RareAlert/);
 
   await Promise.all([
     access(new URL("../out/.nojekyll", import.meta.url)),
     access(new URL("../out/avatar.png", import.meta.url)),
     access(new URL("../out/og-scientist.png", import.meta.url)),
-    access(new URL("../out/tiancheng-he-cutout-v2.png", import.meta.url)),
-    access(new URL("../out/figures/rarelens.png", import.meta.url)),
-    access(new URL("../out/figures/vcu-llm.png", import.meta.url)),
-    access(new URL("../out/figures/safer-steer.png", import.meta.url)),
-    access(new URL("../out/figures/safer-toolkit.png", import.meta.url)),
-    access(new URL("../out/figures/livesearchbench.png", import.meta.url)),
+    access(new URL("../out/images/tiancheng-he-portrait-800.webp", import.meta.url)),
+    access(new URL("../out/images/paper-rarelens-1000.webp", import.meta.url)),
+    access(new URL("../out/images/paper-vcu-llm-1000.webp", import.meta.url)),
+    access(new URL("../out/images/paper-safer-steer-1000.webp", import.meta.url)),
+    access(new URL("../out/images/paper-safer-toolkit-1000.webp", import.meta.url)),
+    access(new URL("../out/images/paper-livesearchbench-1000.webp", import.meta.url)),
     access(new URL("../out/brand/huggingface.svg", import.meta.url)),
     access(new URL("../out/brand/github-mark.svg", import.meta.url)),
     access(new URL("../out/brand/hust-seal.jpg", import.meta.url)),
     access(new URL("../out/brand/bupt-seal.jpg", import.meta.url)),
     access(new URL("../scripts/prepare-pages.mjs", import.meta.url)),
   ]);
+
+  const optimizedImages = await Promise.all([
+    stat(new URL("../out/images/tiancheng-he-portrait-800.webp", import.meta.url)),
+    stat(new URL("../out/images/paper-rarelens-1000.webp", import.meta.url)),
+    stat(new URL("../out/images/paper-vcu-llm-1000.webp", import.meta.url)),
+    stat(new URL("../out/images/paper-safer-steer-1000.webp", import.meta.url)),
+    stat(new URL("../out/images/paper-safer-toolkit-1000.webp", import.meta.url)),
+    stat(new URL("../out/images/paper-livesearchbench-1000.webp", import.meta.url)),
+  ]);
+  const optimizedImageBytes = optimizedImages.reduce((total, image) => total + image.size, 0);
+  assert.ok(optimizedImageBytes < 450_000, `Optimized images total ${optimizedImageBytes} bytes`);
 });

@@ -20,6 +20,7 @@ export default function SectionSwitcher() {
   const [previewIndex, setPreviewIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const switcherRef = useRef<HTMLElement | null>(null);
+  const activeIndexRef = useRef(0);
   const navigationLock = useRef<number | null>(null);
   const settleTimer = useRef<number | null>(null);
   const dragFrame = useRef<number | null>(null);
@@ -30,31 +31,41 @@ export default function SectionSwitcher() {
     currentX: number;
     thumbWidth: number;
     maxX: number;
-    switcherLeft: number;
-    lastClientX: number;
   } | null>(null);
   const armSettleTimer = useRef<() => void>(() => undefined);
 
   useEffect(() => {
     let frame = 0;
+    let resizeObserver: ResizeObserver | null = null;
+    let sectionTops: number[] = [];
+    let pageHeight = 0;
+
+    const measureLayout = () => {
+      sectionTops = sections.map(
+        (section) => document.getElementById(section.id)?.offsetTop ?? Number.POSITIVE_INFINITY,
+      );
+      pageHeight = document.documentElement.scrollHeight;
+    };
 
     const updateActiveSection = () => {
       frame = 0;
       if (dragGesture.current || navigationLock.current !== null) return;
 
       const viewportMarker = window.scrollY + Math.max(112, window.innerHeight * 0.28);
-      const atPageEnd =
-        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      const atPageEnd = window.innerHeight + window.scrollY >= pageHeight - 4;
 
       let nextIndex = 0;
-      sections.forEach((section, index) => {
-        const element = document.getElementById(section.id);
-        if (element && element.offsetTop <= viewportMarker) {
+      sectionTops.forEach((sectionTop, index) => {
+        if (sectionTop <= viewportMarker) {
           nextIndex = index;
         }
       });
 
-      setActiveIndex(atPageEnd ? sections.length - 1 : nextIndex);
+      const resolvedIndex = atPageEnd ? sections.length - 1 : nextIndex;
+      if (activeIndexRef.current !== resolvedIndex) {
+        activeIndexRef.current = resolvedIndex;
+        setActiveIndex(resolvedIndex);
+      }
     };
 
     const releaseNavigationAfterIdle = () => {
@@ -77,6 +88,11 @@ export default function SectionSwitcher() {
       }
     };
 
+    const handleLayoutChange = () => {
+      measureLayout();
+      requestUpdate();
+    };
+
     const handleScroll = () => {
       if (dragGesture.current) return;
 
@@ -88,10 +104,19 @@ export default function SectionSwitcher() {
       requestUpdate();
     };
 
+    measureLayout();
     updateActiveSection();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", requestUpdate);
+    window.addEventListener("resize", handleLayoutChange);
     window.addEventListener("hashchange", requestUpdate);
+
+    if ("ResizeObserver" in window) {
+      resizeObserver = new ResizeObserver(handleLayoutChange);
+      sections.forEach((section) => {
+        const element = document.getElementById(section.id);
+        if (element) resizeObserver?.observe(element);
+      });
+    }
 
     return () => {
       window.cancelAnimationFrame(frame);
@@ -102,7 +127,8 @@ export default function SectionSwitcher() {
         window.clearTimeout(settleTimer.current);
       }
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", requestUpdate);
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", handleLayoutChange);
       window.removeEventListener("hashchange", requestUpdate);
     };
   }, []);
@@ -119,6 +145,7 @@ export default function SectionSwitcher() {
     }
 
     navigationLock.current = index;
+    activeIndexRef.current = index;
     setActiveIndex(index);
     armSettleTimer.current();
   };
@@ -130,17 +157,6 @@ export default function SectionSwitcher() {
     if (!gesture || !switcher) return;
 
     switcher.style.setProperty("--drag-x", `${gesture.currentX}px`);
-    const localPointer = Math.max(
-      0,
-      Math.min(
-        gesture.thumbWidth,
-        gesture.lastClientX - gesture.switcherLeft - gesture.currentX,
-      ),
-    );
-    switcher.style.setProperty(
-      "--lens-light-x",
-      `${(localPointer / gesture.thumbWidth) * 100}%`,
-    );
   };
 
   const queueDragPaint = () => {
@@ -175,13 +191,10 @@ export default function SectionSwitcher() {
       currentX: startX,
       thumbWidth,
       maxX,
-      switcherLeft: switcherRect.left,
-      lastClientX: event.clientX,
     };
 
     navigationLock.current = activeIndex;
     switcher.style.setProperty("--drag-x", `${startX}px`);
-    switcher.style.setProperty("--lens-light-x", "50%");
     setPreviewIndex(activeIndex);
     setIsDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -192,7 +205,6 @@ export default function SectionSwitcher() {
     const gesture = dragGesture.current;
     if (!gesture || gesture.pointerId !== event.pointerId) return;
 
-    gesture.lastClientX = event.clientX;
     gesture.currentX = Math.max(
       0,
       Math.min(
@@ -238,6 +250,7 @@ export default function SectionSwitcher() {
       : activeIndex;
 
     dragGesture.current = null;
+    activeIndexRef.current = targetIndex;
     setActiveIndex(targetIndex);
     setPreviewIndex(targetIndex);
     setIsDragging(false);
@@ -256,10 +269,6 @@ export default function SectionSwitcher() {
       navigationLock.current = null;
     }
 
-    const switcher = switcherRef.current;
-    if (switcher) {
-      switcher.style.setProperty("--lens-light-x", "50%");
-    }
   };
 
   return (

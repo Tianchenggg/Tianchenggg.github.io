@@ -10,6 +10,8 @@ type Publication = {
   links: { label: string; href: string }[];
   image: string;
   imageAlt: string;
+  imageWidth: number;
+  imageHeight: number;
 };
 
 const publications: Publication[] = [
@@ -23,8 +25,10 @@ const publications: Publication[] = [
     summary:
       "Aligns complementary reasoning from heterogeneous LLMs across screening, diagnosis, treatment, and prognosis on a 157,525-case rare-disease benchmark.",
     links: [{ label: "Paper", href: "https://arxiv.org/abs/2607.23290" }],
-    image: "/figures/rarelens.png",
+    image: "/images/paper-rarelens-1000.webp",
     imageAlt: "RareLens RareBench and full-cycle simulation from Figure 2",
+    imageWidth: 1000,
+    imageHeight: 1081,
   },
   {
     date: "Jun 2026",
@@ -42,8 +46,10 @@ const publications: Publication[] = [
         href: "https://www.kaggle.com/datasets/liema77/on-device-vcu-llm-vague-smart-home-commands",
       },
     ],
-    image: "/figures/vcu-llm.png",
+    image: "/images/paper-vcu-llm-1000.webp",
     imageAlt: "VCU-LLM edge and cloud system overview from Figure 9",
+    imageWidth: 1000,
+    imageHeight: 483,
   },
   {
     date: "May 2026",
@@ -58,8 +64,10 @@ const publications: Publication[] = [
       { label: "Paper", href: "https://arxiv.org/abs/2604.16358" },
       { label: "Code", href: "https://github.com/Ed-Bg/SaFeR-Steer" },
     ],
-    image: "/figures/safer-steer.png",
+    image: "/images/paper-safer-steer-1000.webp",
     imageAlt: "SaFeR-Steer training framework from the paper",
+    imageWidth: 1000,
+    imageHeight: 341,
   },
   {
     date: "Mar 2026",
@@ -74,8 +82,10 @@ const publications: Publication[] = [
       { label: "Paper", href: "https://arxiv.org/abs/2603.02635" },
       { label: "Code", href: "https://github.com/Duebassx/SaFeR_ToolKit" },
     ],
-    image: "/figures/safer-toolkit.png",
+    image: "/images/paper-safer-toolkit-1000.webp",
     imageAlt: "SaFeR-ToolKit structured reasoning framework from the paper",
+    imageWidth: 1000,
+    imageHeight: 407,
   },
   {
     date: "Nov 2025",
@@ -91,8 +101,10 @@ const publications: Publication[] = [
       { label: "Project", href: "https://livesearchbench.github.io/" },
       { label: "Code", href: "https://github.com/hengzzzhou/LiveSearchbench" },
     ],
-    image: "/figures/livesearchbench.png",
+    image: "/images/paper-livesearchbench-1000.webp",
     imageAlt: "LiveSearchBench construction pipeline from the paper",
+    imageWidth: 1000,
+    imageHeight: 534,
   },
 ];
 
@@ -166,10 +178,12 @@ export default function Home() {
 
         <figure className="hero-portrait">
           <img
-            src="/tiancheng-he-cutout-v2.png"
+            src="/images/tiancheng-he-portrait-800.webp"
             alt="Portrait of Tiancheng He"
-            width="1122"
-            height="1402"
+            width="800"
+            height="1000"
+            decoding="async"
+            fetchPriority="high"
           />
         </figure>
 
@@ -242,13 +256,16 @@ export default function Home() {
         </div>
 
         <div className="publication-grid">
-          {publications.map((publication, index) => (
+          {publications.map((publication) => (
             <article className="publication-card" key={publication.title}>
               <figure className="publication-visual">
                 <img
                   src={publication.image}
                   alt={publication.imageAlt}
-                  loading={index === 0 ? "eager" : "lazy"}
+                  width={publication.imageWidth}
+                  height={publication.imageHeight}
+                  loading="lazy"
+                  decoding="async"
                 />
               </figure>
               <div className="publication-body">
