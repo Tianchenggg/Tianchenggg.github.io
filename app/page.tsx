@@ -122,7 +122,7 @@ function ExternalLink({
 }) {
   return (
     <a className={className} href={href} target="_blank" rel="noreferrer">
-      <span>{children}</span>
+      <span className="link-label">{children}</span>
       <span className="link-arrow" aria-hidden="true">
         ↗
       </span>
@@ -144,14 +144,34 @@ export default function Home() {
             className="header-huggingface"
             href="https://huggingface.co/htcwang"
           >
-            Hugging Face
+            <span className="header-brand-label">
+              <img
+                className="header-brand-logo header-huggingface-logo"
+                src="/brand/huggingface.svg"
+                alt=""
+                width="20"
+                height="20"
+                aria-hidden="true"
+              />
+              <span className="header-brand-text">Hugging Face</span>
+            </span>
           </ExternalLink>
           <SectionSwitcher />
           <ExternalLink
             className="header-github"
             href="https://github.com/Tianchenggg"
           >
-            GitHub
+            <span className="header-brand-label">
+              <span className="header-github-logo" aria-hidden="true">
+                <img
+                  src="/brand/github-mark.png"
+                  alt=""
+                  width="14"
+                  height="14"
+                />
+              </span>
+              <span className="header-brand-text">GitHub</span>
+            </span>
           </ExternalLink>
         </div>
       </header>
@@ -159,7 +179,20 @@ export default function Home() {
       <main className="portfolio-shell" id="content">
       <section className="hero section-pad" id="home">
         <div className="hero-copy">
-          <p className="hero-role">AI Researcher · HUST</p>
+          <p className="hero-role">
+            <span>AI Researcher</span>
+            <span aria-hidden="true">·</span>
+            <span className="institution-label">
+              <img
+                src="/brand/hust-seal.jpg"
+                alt=""
+                width="20"
+                height="20"
+                aria-hidden="true"
+              />
+              <span>HUST</span>
+            </span>
+          </p>
           <h1>
             Tiancheng <span>He</span>
           </h1>
@@ -170,7 +203,16 @@ export default function Home() {
             <strong>LLM safety</strong>
             <span aria-hidden="true">·</span>
             <strong>Agent creativity</strong>
-            <span>Previously at BUPT</span>
+            <span className="institution-label institution-previous">
+              <img
+                src="/brand/bupt-seal.jpg"
+                alt=""
+                width="20"
+                height="20"
+                aria-hidden="true"
+              />
+              <span>Previously at BUPT</span>
+            </span>
           </p>
         </div>
 
@@ -225,9 +267,13 @@ export default function Home() {
       </section>
 
       <section className="project-section section-pad" id="project">
+        <div className="section-heading">
+          <h2>Project</h2>
+        </div>
+
         <div className="project-panel">
           <div className="project-copy">
-            <h2>Activation Revelation</h2>
+            <h3>Activation Revelation</h3>
             <p>
               An activation-conditioned framework for fine-grained multimodal
               safety auditing: detect unsafe response segments, then ground the

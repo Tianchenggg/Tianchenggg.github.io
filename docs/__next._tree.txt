@@ -1,4 +1,8 @@
-:HL["/_next/static/chunks/0~q~n_zm0.m92.css","style"]
+:HL["/_next/static/chunks/0.obg41gem7r7.css","style"]
+:HL["/brand/huggingface.svg","image"]
+:HL["/brand/github-mark.png","image"]
+:HL["/brand/hust-seal.jpg","image"]
+:HL["/brand/bupt-seal.jpg","image"]
 :HL["/tiancheng-he-cutout-v2.png","image"]
 :HL["/figures/rarelens.png","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"Tua-GgYTJbfB2sqEKsEEo"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"6DTkJDfYFX-ChuYnUt4iH"}

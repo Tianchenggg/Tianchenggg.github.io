@@ -42,6 +42,10 @@ test("server-renders the finished research portfolio", async () => {
   );
   assert.match(html, />Hugging Face</);
   assert.match(html, /class="header-github"[^>]*href="https:\/\/github\.com\/Tianchenggg"/);
+  assert.match(html, /\/brand\/huggingface\.svg/);
+  assert.match(html, /\/brand\/github-mark\.png/);
+  assert.match(html, /\/brand\/hust-seal\.jpg/);
+  assert.match(html, /\/brand\/bupt-seal\.jpg/);
   assert.match(html, /LLM safety/i);
   assert.doesNotMatch(html, /large-model safety/i);
   assert.match(html, /agent creativity/i);
@@ -54,6 +58,8 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, />Code</);
   assert.doesNotMatch(html, />DOI</);
   assert.match(html, /Activation Revelation/);
+  assert.match(html, /<h2>Project<\/h2>/);
+  assert.match(html, /<h3>Activation Revelation<\/h3>/);
   assert.match(html, /tiancheng-he-cutout-v2\.png/);
   assert.doesNotMatch(html, /RareAlert/);
   assert.doesNotMatch(html, /Two questions guide my work|Research should leave the lab/);
@@ -102,7 +108,12 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(switcher, /onPointerMove/);
   assert.match(switcher, /--drag-x/);
   assert.match(switcher, /section-switcher-lens-labels/);
-  assert.match(css, /backdrop-filter:\s*blur\(7px\)\s+saturate\(195%\)/);
+  assert.match(css, /backdrop-filter:\s*blur\(22px\)\s+saturate\(138%\)/);
+  assert.match(css, /cubic-bezier\(0\.22,\s*1,\s*0\.36,\s*1\)/);
+  assert.match(css, /transform:\s*scale\(1\.018\)/);
+  assert.doesNotMatch(css, /liquid-(?:skew|stretch)/);
+  const thumbRule = css.match(/\.section-switcher-thumb\s*{([^}]*)}/s)?.[1] ?? "";
+  assert.doesNotMatch(thumbRule, /backdrop-filter/);
   assert.match(css, /\.section-switcher\.is-dragging/);
   assert.match(page, /\/figures\/rarelens\.png/);
   assert.match(page, /\/figures\/vcu-llm\.png/);
@@ -121,6 +132,10 @@ test("ships the GitHub Pages export and social assets", async () => {
     access(new URL("../out/figures/safer-steer.png", import.meta.url)),
     access(new URL("../out/figures/safer-toolkit.png", import.meta.url)),
     access(new URL("../out/figures/livesearchbench.png", import.meta.url)),
+    access(new URL("../out/brand/huggingface.svg", import.meta.url)),
+    access(new URL("../out/brand/github-mark.png", import.meta.url)),
+    access(new URL("../out/brand/hust-seal.jpg", import.meta.url)),
+    access(new URL("../out/brand/bupt-seal.jpg", import.meta.url)),
     access(new URL("../scripts/prepare-pages.mjs", import.meta.url)),
   ]);
 });

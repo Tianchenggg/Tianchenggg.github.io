@@ -30,8 +30,6 @@ export default function SectionSwitcher() {
     thumbWidth: number;
     maxX: number;
     lastClientX: number;
-    lastTime: number;
-    velocity: number;
   } | null>(null);
   const armSettleTimer = useRef<() => void>(() => undefined);
 
@@ -131,14 +129,6 @@ export default function SectionSwitcher() {
 
     switcher.style.setProperty("--drag-x", `${gesture.currentX}px`);
     switcher.style.setProperty("--drag-label-x", `${-gesture.currentX}px`);
-    switcher.style.setProperty(
-      "--liquid-stretch",
-      `${1 + Math.min(0.05, Math.abs(gesture.velocity) * 0.045)}`,
-    );
-    switcher.style.setProperty(
-      "--liquid-skew",
-      `${Math.max(-3.5, Math.min(3.5, gesture.velocity * 3.5))}deg`,
-    );
 
     const localPointer = Math.max(
       0,
@@ -185,8 +175,6 @@ export default function SectionSwitcher() {
       thumbWidth,
       maxX,
       lastClientX: event.clientX,
-      lastTime: event.timeStamp,
-      velocity: 0,
     };
 
     navigationLock.current = activeIndex;
@@ -202,13 +190,7 @@ export default function SectionSwitcher() {
     const gesture = dragGesture.current;
     if (!gesture || gesture.pointerId !== event.pointerId) return;
 
-    const elapsed = Math.max(8, event.timeStamp - gesture.lastTime);
-    gesture.velocity = Math.max(
-      -1,
-      Math.min(1, (event.clientX - gesture.lastClientX) / elapsed),
-    );
     gesture.lastClientX = event.clientX;
-    gesture.lastTime = event.timeStamp;
     gesture.currentX = Math.max(
       0,
       Math.min(
@@ -263,8 +245,6 @@ export default function SectionSwitcher() {
 
     const switcher = switcherRef.current;
     if (switcher) {
-      switcher.style.setProperty("--liquid-stretch", "1");
-      switcher.style.setProperty("--liquid-skew", "0deg");
       switcher.style.setProperty("--lens-light-x", "50%");
     }
   };
