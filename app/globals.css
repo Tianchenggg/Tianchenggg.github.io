@@ -244,14 +244,14 @@ img {
   color: var(--ink-strong);
   font-size: clamp(4.15rem, 7.3vw, 6.55rem);
   font-weight: 660;
-  letter-spacing: -0.07em;
+  letter-spacing: -0.035em;
   line-height: 0.91;
   white-space: nowrap;
 }
 
 .hero h1 span {
   display: inline-block;
-  margin-left: 0.06em;
+  margin-left: 0.1em;
 }
 
 .hero-statement {

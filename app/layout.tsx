@@ -5,11 +5,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://tianchenggg.github.io"),
   title: "Tiancheng He — AI Researcher",
   description:
-    "Tiancheng He researches large-model safety and agent creativity, guided by the belief that real innovation should solve real problems.",
+    "Tiancheng He researches LLM safety and agent creativity, guided by the belief that real innovation should solve real problems.",
   keywords: [
     "Tiancheng He",
     "AI researcher",
-    "large-model safety",
+    "LLM safety",
     "agent creativity",
     "HUST",
     "BUPT",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     url: "/",
     title: "Tiancheng He — AI Researcher",
     description:
-      "Large-model safety, agent creativity, and research that solves real problems.",
+      "LLM safety, agent creativity, and research that solves real problems.",
     siteName: "Tiancheng He",
     images: [
       {
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Tiancheng He — AI Researcher",
     description:
-      "Large-model safety, agent creativity, and research that solves real problems.",
+      "LLM safety, agent creativity, and research that solves real problems.",
     images: ["/og.png"],
   },
   icons: {

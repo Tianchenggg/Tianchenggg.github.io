@@ -35,7 +35,13 @@ const publications: Publication[] = [
       "Zhengyuan Zhang, Dong Zhao, Tiancheng He, Zilong Wang, Xiangyu Li, Huadong Ma",
     summary:
       "Brings vague-command understanding fully on device, improving smart-home control-plan quality by 43.3% while reducing latency by 8.44×.",
-    links: [{ label: "Paper", href: "https://doi.org/10.1145/3810190" }],
+    links: [
+      { label: "Paper", href: "https://doi.org/10.1145/3810190" },
+      {
+        label: "Kaggle",
+        href: "https://www.kaggle.com/datasets/liema77/on-device-vcu-llm-vague-smart-home-commands",
+      },
+    ],
     image: "/figures/vcu-llm.png",
     imageAlt: "VCU-LLM edge and cloud system overview from Figure 9",
   },
@@ -147,7 +153,7 @@ export default function Home() {
             The greatest innovation solves real problems and makes life easier.
           </p>
           <p className="hero-focus">
-            <strong>Large-model safety</strong>
+            <strong>LLM safety</strong>
             <span aria-hidden="true">·</span>
             <strong>Agent creativity</strong>
             <span>Previously at BUPT</span>

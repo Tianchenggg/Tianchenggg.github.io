@@ -36,10 +36,16 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, />Home</);
   assert.match(html, />Research</);
   assert.match(html, />Project</);
-  assert.match(html, /large-model safety/i);
+  assert.match(html, /LLM safety/i);
+  assert.doesNotMatch(html, /large-model safety/i);
   assert.match(html, /agent creativity/i);
   assert.match(html, /RareLens: Towards End-to-End Rare Disease Care/);
   assert.match(html, /VCU-LLM: Prompt-efficient On-device Large Language Model/);
+  assert.match(
+    html,
+    /https:\/\/www\.kaggle\.com\/datasets\/liema77\/on-device-vcu-llm-vague-smart-home-commands/,
+  );
+  assert.match(html, />Kaggle</);
   assert.doesNotMatch(html, />DOI</);
   assert.match(html, /Activation Revelation/);
   assert.match(html, /tiancheng-he-cutout-v2\.png/);
