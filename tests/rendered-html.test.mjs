@@ -81,6 +81,10 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(css, /-webkit-backdrop-filter/);
   assert.match(css, /section-switcher-thumb/);
+  assert.match(css, /--radius-card:\s*24px/);
+  assert.match(css, /--muted-light:\s*#5a6f85/i);
+  assert.match(css, /aspect-ratio:\s*2\s*\/\s*1/);
+  assert.doesNotMatch(css, /grid-row:\s*2/);
   assert.match(switcher, /aria-current/);
   assert.match(switcher, /requestAnimationFrame/);
   assert.match(switcher, /navigationLock/);
