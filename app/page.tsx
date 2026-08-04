@@ -164,10 +164,10 @@ export default function Home() {
             <span className="header-brand-label">
               <span className="header-github-logo" aria-hidden="true">
                 <img
-                  src="/brand/github-mark.png"
+                  src="/brand/github-mark.svg"
                   alt=""
-                  width="14"
-                  height="14"
+                  width="15"
+                  height="15"
                 />
               </span>
               <span className="header-brand-text">GitHub</span>

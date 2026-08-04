@@ -17,6 +17,7 @@ const sections = [
 
 export default function SectionSwitcher() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [previewIndex, setPreviewIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const switcherRef = useRef<HTMLElement | null>(null);
   const navigationLock = useRef<number | null>(null);
@@ -29,6 +30,7 @@ export default function SectionSwitcher() {
     currentX: number;
     thumbWidth: number;
     maxX: number;
+    switcherLeft: number;
     lastClientX: number;
   } | null>(null);
   const armSettleTimer = useRef<() => void>(() => undefined);
@@ -128,13 +130,11 @@ export default function SectionSwitcher() {
     if (!gesture || !switcher) return;
 
     switcher.style.setProperty("--drag-x", `${gesture.currentX}px`);
-    switcher.style.setProperty("--drag-label-x", `${-gesture.currentX}px`);
-
     const localPointer = Math.max(
       0,
       Math.min(
         gesture.thumbWidth,
-        gesture.lastClientX - switcher.getBoundingClientRect().left - gesture.currentX,
+        gesture.lastClientX - gesture.switcherLeft - gesture.currentX,
       ),
     );
     switcher.style.setProperty(
@@ -153,7 +153,8 @@ export default function SectionSwitcher() {
     if (event.button !== 0 || !switcherRef.current) return;
 
     const switcher = switcherRef.current;
-    const thumbWidth = switcher.getBoundingClientRect().width / sections.length;
+    const switcherRect = switcher.getBoundingClientRect();
+    const thumbWidth = switcherRect.width / sections.length;
     const maxX = thumbWidth * (sections.length - 1);
     const computedTransform = window.getComputedStyle(event.currentTarget).transform;
     let renderedX = activeIndex * thumbWidth;
@@ -174,13 +175,14 @@ export default function SectionSwitcher() {
       currentX: startX,
       thumbWidth,
       maxX,
+      switcherLeft: switcherRect.left,
       lastClientX: event.clientX,
     };
 
     navigationLock.current = activeIndex;
     switcher.style.setProperty("--drag-x", `${startX}px`);
-    switcher.style.setProperty("--drag-label-x", `${-startX}px`);
     switcher.style.setProperty("--lens-light-x", "50%");
+    setPreviewIndex(activeIndex);
     setIsDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
     event.preventDefault();
@@ -197,6 +199,16 @@ export default function SectionSwitcher() {
         gesture.maxX,
         gesture.startX + event.clientX - gesture.startClientX,
       ),
+    );
+    const nextPreviewIndex = Math.max(
+      0,
+      Math.min(
+        sections.length - 1,
+        Math.round(gesture.currentX / gesture.thumbWidth),
+      ),
+    );
+    setPreviewIndex((current) =>
+      current === nextPreviewIndex ? current : nextPreviewIndex,
     );
     queueDragPaint();
     event.preventDefault();
@@ -227,6 +239,7 @@ export default function SectionSwitcher() {
 
     dragGesture.current = null;
     setActiveIndex(targetIndex);
+    setPreviewIndex(targetIndex);
     setIsDragging(false);
 
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -259,25 +272,27 @@ export default function SectionSwitcher() {
       <span
         className="section-switcher-thumb"
         aria-hidden="true"
+      />
+      <span
+        className="section-switcher-drag-handle"
+        aria-hidden="true"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={(event) => finishDrag(event, true)}
         onPointerCancel={(event) => finishDrag(event, false)}
-      >
-        <span className="section-switcher-lens-labels">
-          {sections.map((section) => (
-            <span key={section.id}>{section.label}</span>
-          ))}
-        </span>
-      </span>
+      />
       {sections.map((section, index) => (
         <a
           href={`#${section.id}`}
-          aria-current={activeIndex === index ? "location" : undefined}
+          aria-current={
+            (isDragging ? previewIndex : activeIndex) === index
+              ? "location"
+              : undefined
+          }
           onClick={(event) => handleNavigation(event, index)}
           key={section.id}
         >
-          {section.label}
+          <span>{section.label}</span>
         </a>
       ))}
     </nav>

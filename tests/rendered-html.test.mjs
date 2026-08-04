@@ -36,6 +36,10 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, />Home</);
   assert.match(html, />Research</);
   assert.match(html, />Project</);
+  const switcherMarkup = html.match(/<nav class="section-switcher"[\s\S]*?<\/nav>/)?.[0] ?? "";
+  assert.equal(switcherMarkup.match(/>Home</g)?.length, 1);
+  assert.equal(switcherMarkup.match(/>Research</g)?.length, 1);
+  assert.equal(switcherMarkup.match(/>Project</g)?.length, 1);
   assert.match(
     html,
     /class="header-huggingface"[^>]*href="https:\/\/huggingface\.co\/htcwang"/,
@@ -43,7 +47,7 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, />Hugging Face</);
   assert.match(html, /class="header-github"[^>]*href="https:\/\/github\.com\/Tianchenggg"/);
   assert.match(html, /\/brand\/huggingface\.svg/);
-  assert.match(html, /\/brand\/github-mark\.png/);
+  assert.match(html, /\/brand\/github-mark\.svg/);
   assert.match(html, /\/brand\/hust-seal\.jpg/);
   assert.match(html, /\/brand\/bupt-seal\.jpg/);
   assert.match(html, /LLM safety/i);
@@ -106,11 +110,16 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(switcher, /releaseNavigationAfterIdle/);
   assert.match(switcher, /setPointerCapture/);
   assert.match(switcher, /onPointerMove/);
+  assert.match(switcher, /section-switcher-drag-handle/);
   assert.match(switcher, /--drag-x/);
-  assert.match(switcher, /section-switcher-lens-labels/);
+  assert.match(switcher, /previewIndex/);
+  assert.doesNotMatch(switcher, /section-switcher-lens-labels|--drag-label-x/);
   assert.match(css, /backdrop-filter:\s*blur\(22px\)\s+saturate\(138%\)/);
   assert.match(css, /cubic-bezier\(0\.22,\s*1,\s*0\.36,\s*1\)/);
-  assert.match(css, /transform:\s*scale\(1\.018\)/);
+  assert.match(css, /scale\(1\.018\)/);
+  assert.doesNotMatch(css, /section-switcher-lens-labels|--drag-label-x/);
+  assert.match(css, /\.section-switcher-drag-handle/);
+  assert.doesNotMatch(css, /will-change:\s*transform/);
   assert.doesNotMatch(css, /liquid-(?:skew|stretch)/);
   const thumbRule = css.match(/\.section-switcher-thumb\s*{([^}]*)}/s)?.[1] ?? "";
   assert.doesNotMatch(thumbRule, /backdrop-filter/);
@@ -133,7 +142,7 @@ test("ships the GitHub Pages export and social assets", async () => {
     access(new URL("../out/figures/safer-toolkit.png", import.meta.url)),
     access(new URL("../out/figures/livesearchbench.png", import.meta.url)),
     access(new URL("../out/brand/huggingface.svg", import.meta.url)),
-    access(new URL("../out/brand/github-mark.png", import.meta.url)),
+    access(new URL("../out/brand/github-mark.svg", import.meta.url)),
     access(new URL("../out/brand/hust-seal.jpg", import.meta.url)),
     access(new URL("../out/brand/bupt-seal.jpg", import.meta.url)),
     access(new URL("../scripts/prepare-pages.mjs", import.meta.url)),
