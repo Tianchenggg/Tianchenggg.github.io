@@ -45,7 +45,7 @@ test("server-renders the finished research portfolio", async () => {
     html,
     /https:\/\/www\.kaggle\.com\/datasets\/liema77\/on-device-vcu-llm-vague-smart-home-commands/,
   );
-  assert.match(html, />Kaggle</);
+  assert.match(html, />Code</);
   assert.doesNotMatch(html, />DOI</);
   assert.match(html, /Activation Revelation/);
   assert.match(html, /tiancheng-he-cutout-v2\.png/);

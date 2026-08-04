@@ -38,7 +38,7 @@ const publications: Publication[] = [
     links: [
       { label: "Paper", href: "https://doi.org/10.1145/3810190" },
       {
-        label: "Kaggle",
+        label: "Code",
         href: "https://www.kaggle.com/datasets/liema77/on-device-vcu-llm-vague-smart-home-commands",
       },
     ],
