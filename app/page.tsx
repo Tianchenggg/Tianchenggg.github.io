@@ -35,7 +35,7 @@ const publications: Publication[] = [
       "Zhengyuan Zhang, Dong Zhao, Tiancheng He, Zilong Wang, Xiangyu Li, Huadong Ma",
     summary:
       "Brings vague-command understanding fully on device, improving smart-home control-plan quality by 43.3% while reducing latency by 8.44×.",
-    links: [{ label: "DOI", href: "https://doi.org/10.1145/3810190" }],
+    links: [{ label: "Paper", href: "https://doi.org/10.1145/3810190" }],
     image: "/figures/vcu-llm.png",
     imageAlt: "VCU-LLM edge and cloud system overview from Figure 9",
   },
@@ -139,26 +139,28 @@ export default function Home() {
       <main className="portfolio-shell" id="content">
       <section className="hero section-pad" id="home">
         <div className="hero-copy">
-          <p className="hero-kicker">Tiancheng He · AI Researcher</p>
+          <p className="hero-role">AI Researcher · HUST</p>
           <h1>
-            The greatest innovation solves real problems
-            <span> and makes life easier.</span>
+            Tiancheng <span>He</span>
           </h1>
-          <p className="hero-lede">
-            I work on <strong>large-model safety</strong> and <strong>agent creativity</strong>{" "}
-            at HUST, previously at BUPT.
+          <p className="hero-statement">
+            The greatest innovation solves real problems and makes life easier.
+          </p>
+          <p className="hero-focus">
+            <strong>Large-model safety</strong>
+            <span aria-hidden="true">·</span>
+            <strong>Agent creativity</strong>
+            <span>Previously at BUPT</span>
           </p>
         </div>
 
-        <figure className="portrait-card">
-          <div className="portrait-frame">
-            <img
-              src="/tiancheng-he.jpg"
-              alt="Portrait of Tiancheng He"
-              width="960"
-              height="1200"
-            />
-          </div>
+        <figure className="hero-portrait">
+          <img
+            src="/tiancheng-he-cutout-v2.png"
+            alt="Portrait of Tiancheng He"
+            width="1122"
+            height="1402"
+          />
         </figure>
       </section>
 

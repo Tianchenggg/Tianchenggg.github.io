@@ -1,4 +1,4 @@
-:HL["/_next/static/chunks/0l76dje56op8i.css","style"]
-:HL["/tiancheng-he.jpg","image"]
+:HL["/_next/static/chunks/06_~f2d73yqjh.css","style"]
+:HL["/tiancheng-he-cutout-v2.png","image"]
 :HL["/figures/rarelens.png","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"HS13HoSjCAi7BBsVkofKz"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"O8bfLRwHhngDCA9bPKQCe"}

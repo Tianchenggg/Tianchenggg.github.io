@@ -30,6 +30,7 @@ test("server-renders the finished research portfolio", async () => {
 
   const html = await response.text();
   assert.match(html, /<title>Tiancheng He — AI Researcher<\/title>/i);
+  assert.match(html, /<h1>\s*Tiancheng\s*<span>He<\/span>\s*<\/h1>/);
   assert.match(html, /The greatest innovation solves real problems/);
   assert.match(html, /makes life easier/);
   assert.match(html, />Home</);
@@ -39,8 +40,9 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, /agent creativity/i);
   assert.match(html, /RareLens: Towards End-to-End Rare Disease Care/);
   assert.match(html, /VCU-LLM: Prompt-efficient On-device Large Language Model/);
+  assert.doesNotMatch(html, />DOI</);
   assert.match(html, /Activation Revelation/);
-  assert.match(html, /tiancheng-he\.jpg/);
+  assert.match(html, /tiancheng-he-cutout-v2\.png/);
   assert.doesNotMatch(html, /RareAlert/);
   assert.doesNotMatch(html, /Two questions guide my work|Research should leave the lab/);
   assert.doesNotMatch(
@@ -68,6 +70,8 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /section-switcher-thumb/);
   assert.match(switcher, /aria-current/);
   assert.match(switcher, /requestAnimationFrame/);
+  assert.match(switcher, /navigationLock/);
+  assert.match(switcher, /releaseNavigationAfterIdle/);
   assert.match(page, /\/figures\/rarelens\.png/);
   assert.match(page, /\/figures\/vcu-llm\.png/);
   assert.match(page, /\/figures\/safer-steer\.png/);
@@ -79,7 +83,7 @@ test("ships the GitHub Pages export and social assets", async () => {
     access(new URL("../out/.nojekyll", import.meta.url)),
     access(new URL("../out/avatar.png", import.meta.url)),
     access(new URL("../out/og.png", import.meta.url)),
-    access(new URL("../out/tiancheng-he.jpg", import.meta.url)),
+    access(new URL("../out/tiancheng-he-cutout-v2.png", import.meta.url)),
     access(new URL("../out/figures/rarelens.png", import.meta.url)),
     access(new URL("../out/figures/vcu-llm.png", import.meta.url)),
     access(new URL("../out/figures/safer-steer.png", import.meta.url)),
