@@ -10,12 +10,20 @@ import {
 } from "react";
 
 const sections = [
-  { id: "home", label: "Home" },
-  { id: "research", label: "Research" },
-  { id: "project", label: "Project" },
+  { id: "home", labelKey: "home" },
+  { id: "research", labelKey: "research" },
+  { id: "project", labelKey: "project" },
 ] as const;
 
-export default function SectionSwitcher() {
+type SectionLabels = Record<(typeof sections)[number]["labelKey"], string>;
+
+export default function SectionSwitcher({
+  labels,
+  ariaLabel,
+}: {
+  labels: SectionLabels;
+  ariaLabel: string;
+}) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -275,7 +283,7 @@ export default function SectionSwitcher() {
     <nav
       ref={switcherRef}
       className={`section-switcher${isDragging ? " is-dragging" : ""}`}
-      aria-label="Page sections"
+      aria-label={ariaLabel}
       style={{ "--active-index": activeIndex } as CSSProperties}
     >
       <span
@@ -301,7 +309,7 @@ export default function SectionSwitcher() {
           onClick={(event) => handleNavigation(event, index)}
           key={section.id}
         >
-          <span>{section.label}</span>
+          <span>{labels[section.labelKey]}</span>
         </a>
       ))}
     </nav>

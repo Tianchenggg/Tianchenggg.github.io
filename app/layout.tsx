@@ -8,13 +8,17 @@ export const metadata: Metadata = {
     "Tiancheng He researches LLM safety and agent creativity, guided by the belief that real innovation should solve real problems.",
   keywords: [
     "Tiancheng He",
+    "何天成",
     "AI scientist",
+    "人工智能科学家",
     "LLM safety",
+    "大语言模型安全",
     "agent creativity",
+    "智能体创造力",
     "HUST",
     "BUPT",
   ],
-  authors: [{ name: "Tiancheng He", url: "https://github.com/Tianchenggg" }],
+  authors: [{ name: "Tiancheng He (何天成)", url: "https://github.com/Tianchenggg" }],
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",

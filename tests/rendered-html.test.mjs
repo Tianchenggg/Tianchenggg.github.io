@@ -53,6 +53,12 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, />Home</);
   assert.match(html, />Research</);
   assert.match(html, />Project</);
+  assert.match(
+    html,
+    /class="language-toggle"[^>]*aria-label="Switch to Chinese"/,
+  );
+  assert.doesNotMatch(html, /class="language-toggle"[^>]*aria-pressed=/);
+  assert.match(html, /class="language-option[^>]*lang="zh-CN"[^>]*>中</);
   const switcherMarkup = html.match(/<nav class="section-switcher"[\s\S]*?<\/nav>/)?.[0] ?? "";
   assert.equal(switcherMarkup.match(/>Home</g)?.length, 1);
   assert.equal(switcherMarkup.match(/>Research</g)?.length, 1);
@@ -70,7 +76,7 @@ test("server-renders the finished research portfolio", async () => {
   assert.doesNotMatch(html, /AI Researcher/i);
   assert.match(html, /class="hero-info-rail"/);
   assert.match(html, /Undergraduate/);
-  assert.match(html, /Master(?:'|&#x27;)s/);
+  assert.match(html, /Master(?:’|'|&#x27;)s/);
   const affiliationsMarkup =
     html.match(/<div class="hero-affiliations"[\s\S]*?<\/div><nav class="hero-profiles"/)?.[0] ?? "";
   assert.ok(affiliationsMarkup.indexOf("BUPT") < affiliationsMarkup.indexOf("HUST"));
@@ -124,7 +130,11 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /--radius-card:\s*24px/);
   assert.match(css, /--muted-light:\s*#5a6f85/i);
   assert.match(css, /aspect-ratio:\s*2\s*\/\s*1/);
-  assert.match(css, /\.site-header-inner\s*{[^}]*display:\s*block[^}]*width:\s*min\(348px,\s*100%\)/s);
+  assert.match(css, /\.site-header-layout\s*{[^}]*display:\s*grid[^}]*grid-template-columns:\s*minmax\(56px,\s*1fr\)\s+minmax\(0,\s*348px\)\s+minmax\(56px,\s*1fr\)/s);
+  assert.match(css, /\.site-header-inner\s*{[^}]*display:\s*block[^}]*width:\s*100%/s);
+  assert.match(css, /\.language-toggle\s*{[^}]*min-height:\s*53px/s);
+  assert.match(css, /\.language-option\.is-active\s*{/);
+  assert.match(css, /grid-template-columns:\s*56px\s+minmax\(0,\s*1fr\)\s+56px/);
   assert.match(css, /\.hero-info-rail\s*{/);
   assert.match(css, /\.hero-affiliations\s*{/);
   assert.match(css, /\.hero-profiles\s*{/);
@@ -197,6 +207,8 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(switcher, /ResizeObserver/);
   assert.match(switcher, /sectionTops/);
   assert.match(switcher, /activeIndexRef/);
+  assert.match(switcher, /labels\[section\.labelKey\]/);
+  assert.match(switcher, /aria-label=\{ariaLabel\}/);
   assert.doesNotMatch(switcher, /--lens-light-x/);
   assert.doesNotMatch(switcher, /section-switcher-lens-labels|--drag-label-x/);
   assert.match(css, /backdrop-filter:\s*blur\(14px\)\s+saturate\(125%\)/);
@@ -213,6 +225,27 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /\.section-switcher\.is-dragging/);
   assert.match(page, /loading="lazy"/);
   assert.match(page, /decoding="async"/);
+  assert.match(page, /^"use client";/);
+  assert.match(page, /useSyncExternalStore/);
+  assert.match(page, /window\.localStorage\.getItem\(LANGUAGE_STORAGE_KEY\)/);
+  assert.match(page, /window\.localStorage\.setItem\(LANGUAGE_STORAGE_KEY, language\)/);
+  assert.match(page, /document\.documentElement\.lang\s*=\s*language === "zh" \? "zh-CN" : "en"/);
+  assert.match(page, /document\.title\s*=\s*copy\.documentTitle/);
+  assert.match(page, /onClick=\{\(\) => setLanguagePreference\(nextLanguage\)\}/);
+  assert.match(page, /switchLanguage:\s*"切换为英文"/);
+  assert.doesNotMatch(page, /aria-pressed/);
+  assert.match(page, /何天成/);
+  assert.doesNotMatch(page, /天成和|何天诚/);
+  assert.match(page, /最大的创新，是解决实际问题，让生活更便捷。/);
+  assert.match(page, /北京邮电大学/);
+  assert.match(page, /华中科技大学/);
+  assert.match(page, /RareLens：通过对齐差异化大语言模型推理/);
+  assert.match(page, /VCU-LLM：面向智能家居模糊指令理解/);
+  assert.match(page, /SaFeR-Steer：基于合成自举与反馈动力学/);
+  assert.match(page, /SaFeR-ToolKit：借助虚拟工具调用/);
+  assert.match(page, /LiveSearchBench：面向动态知识检索与推理/);
+  assert.match(page, /opensInNewTab/);
+  assert.match(page, /publication\.imageAlt\[language\]/);
   assert.doesNotMatch(page, /loading=\{index === 0/);
   assert.match(page, /\/images\/paper-rarelens-1000\.webp/);
   assert.match(page, /\/images\/paper-vcu-llm-1000\.webp/);
@@ -223,6 +256,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(page, /imageHeight:/);
   assert.doesNotMatch(page, /\/figures\/.+\.png/);
   assert.doesNotMatch(page, /RareAlert/);
+  assert.match(layout, /何天成/);
 
   await Promise.all([
     access(new URL("../out/.nojekyll", import.meta.url)),

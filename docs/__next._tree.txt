@@ -1,7 +1,2 @@
-:HL["/_next/static/chunks/06v218ucerpd5.css","style"]
-:HL["/images/tiancheng-he-portrait-800.webp","image",{"fetchPriority":"high"}]
-:HL["/brand/bupt-seal.jpg","image"]
-:HL["/brand/hust-seal.jpg","image"]
-:HL["/brand/huggingface.svg","image"]
-:HL["/brand/github-mark.svg","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"ihUHBZAufKmGUq_QRNk9l"}
+:HL["/_next/static/chunks/0iv-rnv.15azi.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"sga7N0DS7mrbjpHFtWNj_"}
