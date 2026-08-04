@@ -3,12 +3,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tianchenggg.github.io"),
-  title: "Tiancheng He — AI Researcher",
+  title: "Tiancheng He — AI Scientist",
   description:
     "Tiancheng He researches LLM safety and agent creativity, guided by the belief that real innovation should solve real problems.",
   keywords: [
     "Tiancheng He",
-    "AI researcher",
+    "AI scientist",
     "LLM safety",
     "agent creativity",
     "HUST",
@@ -19,25 +19,25 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "/",
-    title: "Tiancheng He — AI Researcher",
+    title: "Tiancheng He — AI Scientist",
     description:
       "LLM safety, agent creativity, and research that solves real problems.",
     siteName: "Tiancheng He",
     images: [
       {
-        url: "/og.png",
+        url: "/og-scientist.png",
         width: 1200,
         height: 630,
-        alt: "Tiancheng He — AI Researcher",
+        alt: "Tiancheng He — AI Scientist",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tiancheng He — AI Researcher",
+    title: "Tiancheng He — AI Scientist",
     description:
       "LLM safety, agent creativity, and research that solves real problems.",
-    images: ["/og.png"],
+    images: ["/og-scientist.png"],
   },
   icons: {
     icon: "/avatar.png",

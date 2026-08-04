@@ -147,74 +147,20 @@ export default function Home() {
       <main className="portfolio-shell" id="content">
       <section className="hero section-pad" id="home">
         <div className="hero-copy">
-          <p className="hero-role">
-            <span>AI Researcher</span>
-            <span aria-hidden="true">·</span>
-            <span className="institution-label">
-              <img
-                src="/brand/hust-seal.jpg"
-                alt=""
-                width="20"
-                height="20"
-                aria-hidden="true"
-              />
-              <span>HUST</span>
-            </span>
-          </p>
+          <p className="hero-eyebrow">AI Scientist</p>
           <h1>
             Tiancheng <span>He</span>
           </h1>
           <p className="hero-statement">
             The greatest innovation solves real problems and makes life easier.
           </p>
-          <p className="hero-focus">
-            <strong>LLM safety</strong>
-            <span aria-hidden="true">·</span>
-            <strong>Agent creativity</strong>
-            <span className="institution-label institution-previous">
-              <img
-                src="/brand/bupt-seal.jpg"
-                alt=""
-                width="20"
-                height="20"
-                aria-hidden="true"
-              />
-              <span>Previously at BUPT</span>
-            </span>
-          </p>
-          <div className="hero-socials" aria-label="Research profiles">
-            <ExternalLink
-              className="hero-social-link hero-huggingface"
-              href="https://huggingface.co/htcwang"
-            >
-              <span className="hero-social-label">
-                <img
-                  className="hero-social-logo hero-huggingface-logo"
-                  src="/brand/huggingface.svg"
-                  alt=""
-                  width="19"
-                  height="19"
-                  aria-hidden="true"
-                />
-                <span>Hugging Face</span>
-              </span>
-            </ExternalLink>
-            <ExternalLink
-              className="hero-social-link hero-github"
-              href="https://github.com/Tianchenggg"
-            >
-              <span className="hero-social-label">
-                <img
-                  className="hero-social-logo hero-github-logo"
-                  src="/brand/github-mark.svg"
-                  alt=""
-                  width="18"
-                  height="18"
-                  aria-hidden="true"
-                />
-                <span>GitHub</span>
-              </span>
-            </ExternalLink>
+          <div className="hero-focus-block">
+            <span className="hero-focus-label">Research focus</span>
+            <p className="hero-focus-values">
+              <strong>LLM safety</strong>
+              <span aria-hidden="true">/</span>
+              <strong>Agent creativity</strong>
+            </p>
           </div>
         </div>
 
@@ -226,6 +172,68 @@ export default function Home() {
             height="1402"
           />
         </figure>
+
+        <div className="hero-info-rail">
+          <div className="hero-affiliations" aria-label="Affiliations">
+            <div className="affiliation-item">
+              <img
+                src="/brand/hust-seal.jpg"
+                alt=""
+                width="28"
+                height="28"
+                aria-hidden="true"
+              />
+              <span className="affiliation-copy">
+                <strong>HUST</strong>
+                <small>Current affiliation</small>
+              </span>
+            </div>
+            <div className="affiliation-item">
+              <img
+                src="/brand/bupt-seal.jpg"
+                alt=""
+                width="28"
+                height="28"
+                aria-hidden="true"
+              />
+              <span className="affiliation-copy">
+                <strong>BUPT</strong>
+                <small>Previous affiliation</small>
+              </span>
+            </div>
+          </div>
+
+          <nav className="hero-profiles" aria-label="Research profiles">
+            <ExternalLink
+              className="profile-link profile-huggingface"
+              href="https://huggingface.co/htcwang"
+            >
+              <img
+                className="profile-logo profile-huggingface-logo"
+                src="/brand/huggingface.svg"
+                alt=""
+                width="18"
+                height="18"
+                aria-hidden="true"
+              />
+              <span>Hugging Face</span>
+            </ExternalLink>
+            <ExternalLink
+              className="profile-link profile-github"
+              href="https://github.com/Tianchenggg"
+            >
+              <img
+                className="profile-logo profile-github-logo"
+                src="/brand/github-mark.svg"
+                alt=""
+                width="17"
+                height="17"
+                aria-hidden="true"
+              />
+              <span>GitHub</span>
+            </ExternalLink>
+          </nav>
+        </div>
       </section>
 
       <section className="research section-pad" id="research">

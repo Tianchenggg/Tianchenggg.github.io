@@ -29,7 +29,7 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Tiancheng He — AI Researcher<\/title>/i);
+  assert.match(html, /<title>Tiancheng He — AI Scientist<\/title>/i);
   assert.match(html, /<h1>\s*Tiancheng\s*<span>He<\/span>\s*<\/h1>/);
   assert.match(html, /The greatest innovation solves real problems/);
   assert.match(html, /makes life easier/);
@@ -42,13 +42,18 @@ test("server-renders the finished research portfolio", async () => {
   assert.equal(switcherMarkup.match(/>Project</g)?.length, 1);
   assert.match(
     html,
-    /class="hero-social-link hero-huggingface"[^>]*href="https:\/\/huggingface\.co\/htcwang"/,
+    /class="profile-link profile-huggingface"[^>]*href="https:\/\/huggingface\.co\/htcwang"/,
   );
   assert.match(html, />Hugging Face</);
-  assert.match(html, /class="hero-social-link hero-github"[^>]*href="https:\/\/github\.com\/Tianchenggg"/);
+  assert.match(html, /class="profile-link profile-github"[^>]*href="https:\/\/github\.com\/Tianchenggg"/);
   const headerMarkup = html.match(/<header class="site-header"[\s\S]*?<\/header>/)?.[0] ?? "";
   assert.doesNotMatch(headerMarkup, /Hugging Face|GitHub/);
   assert.match(headerMarkup, /class="section-switcher"/);
+  assert.match(html, />AI Scientist</);
+  assert.doesNotMatch(html, /AI Researcher/i);
+  assert.match(html, /class="hero-info-rail"/);
+  assert.match(html, /Current affiliation/);
+  assert.match(html, /Previous affiliation/);
   assert.match(html, /\/brand\/huggingface\.svg/);
   assert.match(html, /\/brand\/github-mark\.svg/);
   assert.match(html, /\/brand\/hust-seal\.jpg/);
@@ -88,9 +93,9 @@ test("ships the GitHub Pages export and social assets", async () => {
     readFile(new URL("../app/section-switcher.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.match(html, /Tiancheng He — AI Researcher/);
+  assert.match(html, /Tiancheng He — AI Scientist/);
   assert.match(layout, /https:\/\/tianchenggg\.github\.io/);
-  assert.match(layout, /\/og\.png/);
+  assert.match(layout, /\/og-scientist\.png/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(css, /-webkit-backdrop-filter/);
   assert.match(css, /section-switcher-thumb/);
@@ -98,9 +103,12 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /--muted-light:\s*#5a6f85/i);
   assert.match(css, /aspect-ratio:\s*2\s*\/\s*1/);
   assert.match(css, /\.site-header-inner\s*{[^}]*display:\s*block[^}]*width:\s*min\(348px,\s*100%\)/s);
-  assert.match(css, /\.hero-socials\s*{/);
-  assert.match(css, /\.hero-huggingface\s*{/);
-  assert.match(css, /\.hero-github\s*{/);
+  assert.match(css, /\.hero-info-rail\s*{/);
+  assert.match(css, /\.hero-affiliations\s*{/);
+  assert.match(css, /\.hero-profiles\s*{/);
+  assert.match(css, /\.profile-link\s*{/);
+  assert.doesNotMatch(css, /\.hero-socials\s*{|\.hero-social-link\s*{/);
+  assert.doesNotMatch(layout, /AI Researcher/i);
   assert.match(switcher, /aria-current/);
   assert.match(switcher, /requestAnimationFrame/);
   assert.match(switcher, /navigationLock/);
@@ -131,7 +139,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   await Promise.all([
     access(new URL("../out/.nojekyll", import.meta.url)),
     access(new URL("../out/avatar.png", import.meta.url)),
-    access(new URL("../out/og.png", import.meta.url)),
+    access(new URL("../out/og-scientist.png", import.meta.url)),
     access(new URL("../out/tiancheng-he-cutout-v2.png", import.meta.url)),
     access(new URL("../out/figures/rarelens.png", import.meta.url)),
     access(new URL("../out/figures/vcu-llm.png", import.meta.url)),
