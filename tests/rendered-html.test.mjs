@@ -2,6 +2,23 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
+function cssBlock(source, marker) {
+  const markerIndex = source.indexOf(marker);
+  assert.notEqual(markerIndex, -1, `Missing CSS block: ${marker}`);
+
+  const openingBrace = source.indexOf("{", markerIndex);
+  assert.notEqual(openingBrace, -1, `Missing opening brace: ${marker}`);
+
+  let depth = 0;
+  for (let index = openingBrace; index < source.length; index += 1) {
+    if (source[index] === "{") depth += 1;
+    if (source[index] === "}") depth -= 1;
+    if (depth === 0) return source.slice(openingBrace + 1, index);
+  }
+
+  assert.fail(`Missing closing brace: ${marker}`);
+}
+
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
@@ -88,14 +105,16 @@ test("server-renders the finished research portfolio", async () => {
 });
 
 test("ships the GitHub Pages export and social assets", async () => {
-  const [html, layout, css, page, switcher] = await Promise.all([
+  const [html, docsHtml, layout, css, page, switcher] = await Promise.all([
     readFile(new URL("../out/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../docs/index.html", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/section-switcher.tsx", import.meta.url), "utf8"),
   ]);
 
+  assert.equal(docsHtml, html);
   assert.match(html, /Tiancheng He — AI Scientist/);
   assert.match(layout, /https:\/\/tianchenggg\.github\.io/);
   assert.match(layout, /\/og-scientist\.png/);
@@ -113,10 +132,44 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /min-height:\s*100svh/);
   assert.match(css, /@supports\s*\(animation-timeline:\s*view\(\)\)/);
   assert.match(css, /animation-timeline:\s*view\(block\)/);
-  assert.match(css, /animation-range:\s*entry 0% entry 68%/);
-  assert.match(css, /@keyframes\s+research-card-reveal/);
+  assert.match(css, /animation-range:[\s\S]*cover 0% cover 34%,[\s\S]*cover 0% cover 100%/);
+  assert.match(css, /@keyframes\s+research-card-arrive/);
+  assert.match(css, /@keyframes\s+research-card-focus/);
+  assert.match(css, /@keyframes\s+research-heading-focus/);
+  assert.match(css, /@keyframes\s+hero-deemphasize/);
+  assert.match(css, /76%\s*{[^}]*opacity:\s*0\.45/s);
+  assert.match(css, /100%\s*{[^}]*opacity:\s*0\.22/s);
+  assert.match(css, /animation-range:\s*exit 0% exit 68%/);
   assert.match(css, /prefers-reduced-motion:\s*no-preference/);
   assert.match(css, /animation:\s*none\s*!important/);
+  assert.match(css, /filter:\s*none/);
+
+  const baseHeroRule = cssBlock(css, ".hero {");
+  assert.match(baseHeroRule, /filter:\s*none/);
+  assert.match(baseHeroRule, /opacity:\s*1/);
+  assert.doesNotMatch(baseHeroRule, /grayscale\([^0]|opacity:\s*0/);
+
+  const baseCardRule = cssBlock(css, ".publication-card {");
+  assert.match(baseCardRule, /filter:\s*none/);
+  assert.match(baseCardRule, /opacity:\s*1/);
+
+  const viewTimelineRules = cssBlock(css, "@supports (animation-timeline: view())");
+  assert.match(
+    viewTimelineRules,
+    /\.hero\s*{[^}]*animation:\s*hero-deemphasize linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*exit 0% exit 68%/s,
+  );
+  assert.match(
+    viewTimelineRules,
+    /\.publication-card\s*{[^}]*research-card-arrive linear both,[^}]*research-card-focus linear both[^}]*cover 0% cover 34%,[^}]*cover 0% cover 100%/s,
+  );
+  assert.match(viewTimelineRules, /\.publication-card:focus-within\s*{[^}]*opacity:\s*1\s*!important/s);
+  assert.match(viewTimelineRules, /\.publication-card:hover\s*{[^}]*opacity:\s*1\s*!important/s);
+
+  const reducedMotionRules = cssBlock(css, "@media (prefers-reduced-motion: reduce)");
+  assert.match(reducedMotionRules, /\.hero,[\s\S]*\.publication-card\s*{/);
+  assert.match(reducedMotionRules, /animation:\s*none\s*!important/);
+  assert.match(reducedMotionRules, /filter:\s*none/);
+  assert.match(reducedMotionRules, /opacity:\s*1/);
   assert.doesNotMatch(css, /\.hero-socials\s*{|\.hero-social-link\s*{/);
   assert.doesNotMatch(layout, /AI Researcher/i);
   assert.match(switcher, /aria-current/);
