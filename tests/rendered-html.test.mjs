@@ -98,6 +98,12 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(switcher, /requestAnimationFrame/);
   assert.match(switcher, /navigationLock/);
   assert.match(switcher, /releaseNavigationAfterIdle/);
+  assert.match(switcher, /setPointerCapture/);
+  assert.match(switcher, /onPointerMove/);
+  assert.match(switcher, /--drag-x/);
+  assert.match(switcher, /section-switcher-lens-labels/);
+  assert.match(css, /backdrop-filter:\s*blur\(7px\)\s+saturate\(195%\)/);
+  assert.match(css, /\.section-switcher\.is-dragging/);
   assert.match(page, /\/figures\/rarelens\.png/);
   assert.match(page, /\/figures\/vcu-llm\.png/);
   assert.match(page, /\/figures\/safer-steer\.png/);
