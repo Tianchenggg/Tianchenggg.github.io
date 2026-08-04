@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
+import SectionSwitcher from "./section-switcher";
 
 type Publication = {
-  index: string;
   date: string;
   venue: string;
   title: string;
@@ -10,16 +10,12 @@ type Publication = {
   links: { label: string; href: string }[];
   image: string;
   imageAlt: string;
-  figureLabel: string;
-  note?: string;
 };
 
 const publications: Publication[] = [
   {
-    index: "01",
     date: "Jul 2026",
     venue: "arXiv · cs.AI",
-    note: "Latest",
     title:
       "RareLens: Towards End-to-End Rare Disease Care via Aligning Divergent Large Language Model Reasoning",
     authors:
@@ -27,15 +23,12 @@ const publications: Publication[] = [
     summary:
       "Aligns complementary reasoning from heterogeneous LLMs across screening, diagnosis, treatment, and prognosis on a 157,525-case rare-disease benchmark.",
     links: [{ label: "Paper", href: "https://arxiv.org/abs/2607.23290" }],
-    image: "/papers/rarelens.png",
+    image: "/figures/rarelens.png",
     imageAlt: "RareLens RareBench and full-cycle simulation from Figure 2",
-    figureLabel: "Figure 2 · RareBench & full-cycle simulation",
   },
   {
-    index: "02",
     date: "Jun 2026",
     venue: "PACM IMWUT · 10(2)",
-    note: "Peer-reviewed",
     title:
       "VCU-LLM: Prompt-efficient On-device Large Language Model for Vague Command Understanding in Smart Homes",
     authors:
@@ -43,12 +36,10 @@ const publications: Publication[] = [
     summary:
       "Brings vague-command understanding fully on device, improving smart-home control-plan quality by 43.3% while reducing latency by 8.44×.",
     links: [{ label: "DOI", href: "https://doi.org/10.1145/3810190" }],
-    image: "/papers/vcu-llm.png",
+    image: "/figures/vcu-llm.png",
     imageAlt: "VCU-LLM edge and cloud system overview from Figure 9",
-    figureLabel: "Figure 9 · VCU-LLM system overview",
   },
   {
-    index: "03",
     date: "May 2026",
     venue: "arXiv · cs.LG / cs.CL",
     title:
@@ -61,15 +52,12 @@ const publications: Publication[] = [
       { label: "Paper", href: "https://arxiv.org/abs/2604.16358" },
       { label: "Code", href: "https://github.com/Ed-Bg/SaFeR-Steer" },
     ],
-    image: "/papers/safer-steer.png",
+    image: "/figures/safer-steer.png",
     imageAlt: "SaFeR-Steer training framework from the paper",
-    figureLabel: "Figure 3 · three-stage training framework",
   },
   {
-    index: "04",
     date: "Mar 2026",
     venue: "arXiv · cs.LG",
-    note: "Co-first author",
     title:
       "SaFeR-ToolKit: Structured Reasoning via Virtual Tool Calling for Multimodal Safety",
     authors:
@@ -80,12 +68,10 @@ const publications: Publication[] = [
       { label: "Paper", href: "https://arxiv.org/abs/2603.02635" },
       { label: "Code", href: "https://github.com/Duebassx/SaFeR_ToolKit" },
     ],
-    image: "/papers/safer-toolkit.png",
+    image: "/figures/safer-toolkit.png",
     imageAlt: "SaFeR-ToolKit structured reasoning framework from the paper",
-    figureLabel: "Figure 2 · framework & training pipeline",
   },
   {
-    index: "05",
     date: "Nov 2025",
     venue: "arXiv · cs.CL",
     title:
@@ -99,9 +85,8 @@ const publications: Publication[] = [
       { label: "Project", href: "https://livesearchbench.github.io/" },
       { label: "Code", href: "https://github.com/hengzzzhou/LiveSearchbench" },
     ],
-    image: "/papers/livesearchbench.png",
+    image: "/figures/livesearchbench.png",
     imageAlt: "LiveSearchBench construction pipeline from the paper",
-    figureLabel: "Figure 3 · benchmark generation pipeline",
   },
 ];
 
@@ -135,61 +120,33 @@ function ExternalLink({
       <span className="link-arrow" aria-hidden="true">
         ↗
       </span>
+      <span className="sr-only"> (opens in a new tab)</span>
     </a>
   );
 }
 
 export default function Home() {
   return (
-    <main className="portfolio-shell">
-      <a className="skip-link" href="#research">
-        Skip to research
+    <>
+      <a className="skip-link" href="#content">
+        Skip to content
       </a>
 
       <header className="site-header">
-        <nav className="glass-nav" aria-label="Primary navigation">
-          <a className="brand-mark" href="#top" aria-label="Tiancheng He, home">
-            <span className="brand-monogram">TH</span>
-            <span>Tiancheng He</span>
-          </a>
-          <div className="nav-links">
-            <a href="#research">Research</a>
-            <a href="#project">Project</a>
-          </div>
-          <ExternalLink className="nav-cta" href="https://github.com/Tianchenggg">
-            GitHub
-          </ExternalLink>
-        </nav>
+        <SectionSwitcher />
       </header>
 
-      <section className="hero section-pad" id="top">
+      <main className="portfolio-shell" id="content">
+      <section className="hero section-pad" id="home">
         <div className="hero-copy">
-          <span className="eyebrow">AI researcher · HUST</span>
+          <p className="hero-kicker">Tiancheng He · AI Researcher</p>
           <h1>
-            Real innovation
-            <span> solves real problems.</span>
+            The greatest innovation solves real problems
+            <span> and makes life easier.</span>
           </h1>
-          <p className="hero-belief">
-            I believe research matters most when it makes people&apos;s lives easier.
-          </p>
           <p className="hero-lede">
-            I&apos;m <strong>Tiancheng He</strong>. My work focuses on large-model
-            safety and agent creativity—turning ambitious AI ideas into useful,
-            reliable systems.
-          </p>
-          <div className="hero-actions">
-            <a className="primary-button" href="#research">
-              Selected research <span aria-hidden="true">↓</span>
-            </a>
-            <ExternalLink className="text-link" href="https://github.com/Tianchenggg">
-              GitHub profile
-            </ExternalLink>
-          </div>
-          <p className="research-path">
-            <span>Research path</span>
-            <strong>BUPT</strong>
-            <span aria-hidden="true">→</span>
-            <strong>HUST</strong>
+            I work on <strong>large-model safety</strong> and <strong>agent creativity</strong>{" "}
+            at HUST, previously at BUPT.
           </p>
         </div>
 
@@ -202,44 +159,28 @@ export default function Home() {
               height="1200"
             />
           </div>
-          <figcaption>
-            <div>
-              <strong>Tiancheng He</strong>
-              <span>AI Researcher</span>
-            </div>
-            <span>HUST · Wuhan</span>
-          </figcaption>
         </figure>
       </section>
 
       <section className="research section-pad" id="research">
         <div className="section-heading">
-          <div>
-            <span className="eyebrow">Selected publications · 2025—2026</span>
-            <h2>Selected research</h2>
-          </div>
+          <h2>Research</h2>
         </div>
 
         <div className="publication-grid">
           {publications.map((publication, index) => (
-            <article
-              className={`publication-card ${index === 0 ? "publication-featured" : ""}`}
-              key={publication.title}
-            >
+            <article className="publication-card" key={publication.title}>
               <figure className="publication-visual">
                 <img
                   src={publication.image}
                   alt={publication.imageAlt}
                   loading={index === 0 ? "eager" : "lazy"}
                 />
-                <figcaption className="figure-caption">{publication.figureLabel}</figcaption>
               </figure>
               <div className="publication-body">
                 <div className="publication-meta">
-                  <span className="publication-index">{publication.index}</span>
                   <time>{publication.date}</time>
                   <span>{publication.venue}</span>
-                  {publication.note ? <em>{publication.note}</em> : null}
                 </div>
                 <div className="publication-copy">
                 <h3>{publication.title}</h3>
@@ -264,7 +205,6 @@ export default function Home() {
       <section className="project-section section-pad" id="project">
         <div className="project-panel">
           <div className="project-copy">
-            <span className="eyebrow">Open research project</span>
             <h2>Activation Revelation</h2>
             <p>
               An activation-conditioned framework for fine-grained multimodal
@@ -296,15 +236,10 @@ export default function Home() {
       </section>
 
       <footer className="site-footer section-pad">
-        <p>
-          <strong>Tiancheng He</strong>
-          <span>Research for real problems.</span>
-        </p>
-        <div>
-          <span>Wuhan · China</span>
-          <a href="#top">Back to top ↑</a>
-        </div>
+        <strong>Tiancheng He</strong>
+        <ExternalLink href="https://github.com/Tianchenggg">GitHub</ExternalLink>
       </footer>
-    </main>
+      </main>
+    </>
   );
 }

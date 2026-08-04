@@ -1,4 +1,4 @@
-:HL["/_next/static/chunks/0kbfw-et~nhue.css","style"]
+:HL["/_next/static/chunks/0l76dje56op8i.css","style"]
 :HL["/tiancheng-he.jpg","image"]
-:HL["/papers/rarelens.png","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"mA08V6a-9C1Zkd1eidksV"}
+:HL["/figures/rarelens.png","image"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"HS13HoSjCAi7BBsVkofKz"}
