@@ -139,7 +139,22 @@ export default function Home() {
       </a>
 
       <header className="site-header">
-        <SectionSwitcher />
+        <div className="site-header-inner">
+          <a
+            className="header-identity"
+            href="#home"
+            aria-label="Tiancheng He — Home"
+          >
+            Tiancheng He
+          </a>
+          <SectionSwitcher />
+          <ExternalLink
+            className="header-github"
+            href="https://github.com/Tianchenggg"
+          >
+            GitHub
+          </ExternalLink>
+        </div>
       </header>
 
       <main className="portfolio-shell" id="content">
@@ -243,10 +258,6 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="site-footer section-pad">
-        <strong>Tiancheng He</strong>
-        <ExternalLink href="https://github.com/Tianchenggg">GitHub</ExternalLink>
-      </footer>
       </main>
     </>
   );

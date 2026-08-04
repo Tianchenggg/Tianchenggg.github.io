@@ -36,6 +36,8 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, />Home</);
   assert.match(html, />Research</);
   assert.match(html, />Project</);
+  assert.match(html, /class="header-identity"[^>]*href="#home"/);
+  assert.match(html, /class="header-github"[^>]*href="https:\/\/github\.com\/Tianchenggg"/);
   assert.match(html, /LLM safety/i);
   assert.doesNotMatch(html, /large-model safety/i);
   assert.match(html, /agent creativity/i);
@@ -55,6 +57,7 @@ test("server-renders the finished research portfolio", async () => {
     html,
     /Selected research|GitHub profile|Selected publications|Research path|Open research project/i,
   );
+  assert.doesNotMatch(html, /<footer\b/i);
   assert.match(html, /prefers-reduced-motion|skip-link/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
