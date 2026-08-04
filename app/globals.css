@@ -353,6 +353,13 @@ img {
   padding-bottom: 24px;
 }
 
+@media (min-width: 701px) {
+  .hero {
+    min-height: 100svh;
+    align-content: center;
+  }
+}
+
 .hero-copy {
   max-width: 710px;
   align-self: center;
@@ -588,8 +595,24 @@ img {
 }
 
 .research {
+  isolation: isolate;
   padding-top: 30px;
   padding-bottom: 50px;
+}
+
+.research::before {
+  position: absolute;
+  inset: -42px 12px auto;
+  z-index: -1;
+  height: clamp(260px, 38vw, 430px);
+  border-radius: 44% 56% 52% 48%;
+  background:
+    radial-gradient(circle at 18% 30%, rgb(84 169 255 / 0.15), transparent 48%),
+    radial-gradient(circle at 82% 18%, rgb(136 112 246 / 0.12), transparent 44%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 62%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0 62%, transparent 100%);
+  content: "";
+  pointer-events: none;
 }
 
 .section-heading {
@@ -668,6 +691,48 @@ img {
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgb(33 59 91 / 0.08);
+}
+
+@keyframes research-heading-reveal {
+  from {
+    opacity: 0;
+    translate: 0 28px;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes research-card-reveal {
+  from {
+    opacity: 0;
+    scale: 0.985;
+    translate: 0 42px;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .research .section-heading {
+      animation: research-heading-reveal linear both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 82%;
+    }
+
+    .publication-card {
+      animation: research-card-reveal linear both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 68%;
+    }
+  }
 }
 
 .publication-body {
@@ -1183,5 +1248,13 @@ a:focus-visible .link-arrow {
   .section-switcher-thumb,
   .section-switcher-drag-handle {
     transition: none;
+  }
+
+  .research .section-heading,
+  .publication-card {
+    animation: none !important;
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
   }
 }

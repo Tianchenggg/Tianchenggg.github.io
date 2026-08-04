@@ -52,8 +52,11 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, />AI Scientist</);
   assert.doesNotMatch(html, /AI Researcher/i);
   assert.match(html, /class="hero-info-rail"/);
-  assert.match(html, /Current affiliation/);
-  assert.match(html, /Previous affiliation/);
+  assert.match(html, /Undergraduate/);
+  assert.match(html, /Master(?:'|&#x27;)s/);
+  const affiliationsMarkup =
+    html.match(/<div class="hero-affiliations"[\s\S]*?<\/div><nav class="hero-profiles"/)?.[0] ?? "";
+  assert.ok(affiliationsMarkup.indexOf("BUPT") < affiliationsMarkup.indexOf("HUST"));
   assert.match(html, /\/brand\/huggingface\.svg/);
   assert.match(html, /\/brand\/github-mark\.svg/);
   assert.match(html, /\/brand\/hust-seal\.jpg/);
@@ -107,6 +110,13 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /\.hero-affiliations\s*{/);
   assert.match(css, /\.hero-profiles\s*{/);
   assert.match(css, /\.profile-link\s*{/);
+  assert.match(css, /min-height:\s*100svh/);
+  assert.match(css, /@supports\s*\(animation-timeline:\s*view\(\)\)/);
+  assert.match(css, /animation-timeline:\s*view\(block\)/);
+  assert.match(css, /animation-range:\s*entry 0% entry 68%/);
+  assert.match(css, /@keyframes\s+research-card-reveal/);
+  assert.match(css, /prefers-reduced-motion:\s*no-preference/);
+  assert.match(css, /animation:\s*none\s*!important/);
   assert.doesNotMatch(css, /\.hero-socials\s*{|\.hero-social-link\s*{/);
   assert.doesNotMatch(layout, /AI Researcher/i);
   assert.match(switcher, /aria-current/);

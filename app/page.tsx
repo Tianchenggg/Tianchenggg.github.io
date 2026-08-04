@@ -177,19 +177,6 @@ export default function Home() {
           <div className="hero-affiliations" aria-label="Affiliations">
             <div className="affiliation-item">
               <img
-                src="/brand/hust-seal.jpg"
-                alt=""
-                width="28"
-                height="28"
-                aria-hidden="true"
-              />
-              <span className="affiliation-copy">
-                <strong>HUST</strong>
-                <small>Current affiliation</small>
-              </span>
-            </div>
-            <div className="affiliation-item">
-              <img
                 src="/brand/bupt-seal.jpg"
                 alt=""
                 width="28"
@@ -198,7 +185,20 @@ export default function Home() {
               />
               <span className="affiliation-copy">
                 <strong>BUPT</strong>
-                <small>Previous affiliation</small>
+                <small>Undergraduate</small>
+              </span>
+            </div>
+            <div className="affiliation-item">
+              <img
+                src="/brand/hust-seal.jpg"
+                alt=""
+                width="28"
+                height="28"
+                aria-hidden="true"
+              />
+              <span className="affiliation-copy">
+                <strong>HUST</strong>
+                <small>Master&apos;s</small>
               </span>
             </div>
           </div>
