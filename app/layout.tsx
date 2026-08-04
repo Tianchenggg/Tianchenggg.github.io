@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://tianchenggg.github.io"),
   title: "Tiancheng He — AI Researcher",
   description:
-    "Tiancheng He researches multimodal safety, LLM reasoning, on-device intelligence, and AI for science.",
+    "Tiancheng He researches large-model safety and agent creativity, guided by the belief that real innovation should solve real problems.",
   keywords: [
     "Tiancheng He",
     "AI researcher",
-    "multimodal safety",
-    "LLM reasoning",
+    "large-model safety",
+    "agent creativity",
     "HUST",
     "BUPT",
   ],
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     url: "/",
     title: "Tiancheng He — AI Researcher",
     description:
-      "Multimodal safety, LLM reasoning, on-device intelligence, and AI for science.",
+      "Large-model safety, agent creativity, and research that solves real problems.",
     siteName: "Tiancheng He",
     images: [
       {
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Tiancheng He — AI Researcher",
     description:
-      "Multimodal safety, LLM reasoning, on-device intelligence, and AI for science.",
+      "Large-model safety, agent creativity, and research that solves real problems.",
     images: ["/og.png"],
   },
   icons: {
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#07111f",
+  themeColor: "#f3f6fa",
 };
 
 export default function RootLayout({

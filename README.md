@@ -1,6 +1,6 @@
 # Tiancheng He — Research Portfolio
 
-Personal academic homepage for [Tiancheng He](https://github.com/Tianchenggg), featuring selected work in multimodal safety, LLM reasoning, efficient intelligence, and AI for science.
+Personal academic homepage for [Tiancheng He](https://github.com/Tianchenggg), featuring five selected works and a research focus on large-model safety and agent creativity.
 
 ## Local development
 
