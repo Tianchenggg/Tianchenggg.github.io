@@ -12,7 +12,8 @@ npm run dev
 The site supports two production targets:
 
 - `npm run build` creates the Cloudflare-compatible Sites build.
-- `npm run build:pages` creates the static `out/` bundle used by GitHub Pages.
+- `npm run build:pages` creates the static `out/` bundle.
+- `npm run prepare:pages` refreshes the committed `docs/` snapshot served by GitHub Pages.
 
 ## Publication data
 

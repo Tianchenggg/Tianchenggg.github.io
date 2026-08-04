@@ -55,6 +55,6 @@ test("ships the GitHub Pages export and social assets", async () => {
     access(new URL("../out/.nojekyll", import.meta.url)),
     access(new URL("../out/avatar.png", import.meta.url)),
     access(new URL("../out/og.png", import.meta.url)),
-    access(new URL("../.github/workflows/deploy-pages.yml", import.meta.url)),
+    access(new URL("../scripts/prepare-pages.mjs", import.meta.url)),
   ]);
 });
