@@ -64,8 +64,8 @@ test("server-renders the finished research portfolio", async () => {
   const html = await response.text();
   assert.match(html, /<title>Tiancheng He — AI Scientist<\/title>/i);
   assert.match(html, /<h1>\s*Tiancheng\s*<span>He<\/span>\s*<\/h1>/);
-  assert.match(html, /The greatest innovation solves real problems/);
-  assert.match(html, /makes life easier/);
+  assert.match(html, /Research should solve real-world problems/);
+  assert.match(html, /and improve people’s lives\./);
   assert.match(html, />Home</);
   assert.match(html, />Research</);
   assert.match(html, />Awards</);
@@ -393,7 +393,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(page, /awardsListLabel:\s*"按时间倒序排列的奖项"/);
   assert.match(page, /何天成/);
   assert.doesNotMatch(page, /天成和|何天诚/);
-  assert.match(page, /最大的创新，是解决实际问题，让生活更便捷。/);
+  assert.match(page, /研究应解决现实问题，改善人们的生活。/);
   assert.match(page, /北京邮电大学/);
   assert.match(page, /华中科技大学/);
   assert.match(page, /RareLens：通过对齐差异化大语言模型推理/);

@@ -96,7 +96,7 @@ const siteCopy = {
     role: "AI Scientist",
     name: "Tiancheng He",
     statement:
-      "The greatest innovation solves real problems and makes life easier.",
+      "Research should solve real-world problems and improve people’s lives.",
     focusLabel: "Research focus",
     safety: "LLM safety",
     creativity: "Agent creativity",
@@ -136,7 +136,7 @@ const siteCopy = {
     },
     role: "人工智能科学家",
     name: "何天成",
-    statement: "最大的创新，是解决实际问题，让生活更便捷。",
+    statement: "研究应解决现实问题，改善人们的生活。",
     focusLabel: "研究方向",
     safety: "大语言模型安全",
     creativity: "智能体创造力",
