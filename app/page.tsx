@@ -24,6 +24,11 @@ type Publication = {
   imageHeight: number;
 };
 
+type Award = {
+  year: string;
+  title: LocalizedText;
+};
+
 const LANGUAGE_STORAGE_KEY = "tiancheng-portfolio-language";
 const languageListeners = new Set<() => void>();
 let memoryLanguage: Language = "en";
@@ -82,7 +87,12 @@ const siteCopy = {
     skipLink: "Skip to content",
     switchLanguage: "Switch to Chinese",
     navigationLabel: "Page sections",
-    navigation: { home: "Home", research: "Research", project: "Project" },
+    navigation: {
+      home: "Home",
+      research: "Research",
+      awards: "Awards",
+      project: "Project",
+    },
     role: "AI Scientist",
     name: "Tiancheng He",
     statement:
@@ -98,10 +108,17 @@ const siteCopy = {
     masters: "Master’s",
     profilesLabel: "Research profiles",
     researchHeading: "Research",
+    awardsHeading: "Awards",
+    awardsListLabel: "Awards in reverse chronological order",
     projectHeading: "Project",
+    projectKicker: "Activation-conditioned",
+    projectFlowLabel: "Safety-auditing workflow",
+    projectModelResponse: "Model response",
+    projectUnsafeSegments: "Unsafe segments",
+    projectSupportingRegions: "Supporting image regions",
     projectDescription:
       "An activation-conditioned framework for fine-grained multimodal safety auditing: detect unsafe response segments, then ground the image regions that support the risk.",
-    projectLink: "Explore the repository",
+    projectLink: "Repository",
     projectResultsLabel: "Project results",
     newDataset: "new dataset",
     opensInNewTab: " (opens in a new tab)",
@@ -111,7 +128,12 @@ const siteCopy = {
     skipLink: "跳至主要内容",
     switchLanguage: "切换为英文",
     navigationLabel: "页面导航",
-    navigation: { home: "首页", research: "研究", project: "项目" },
+    navigation: {
+      home: "首页",
+      research: "研究",
+      awards: "奖项",
+      project: "项目",
+    },
     role: "人工智能科学家",
     name: "何天成",
     statement: "最大的创新，是解决实际问题，让生活更便捷。",
@@ -126,10 +148,17 @@ const siteCopy = {
     masters: "硕士",
     profilesLabel: "学术主页",
     researchHeading: "研究",
+    awardsHeading: "奖项",
+    awardsListLabel: "按时间倒序排列的奖项",
     projectHeading: "项目",
+    projectKicker: "激活状态驱动",
+    projectFlowLabel: "安全审计流程",
+    projectModelResponse: "模型回复",
+    projectUnsafeSegments: "不安全片段",
+    projectSupportingRegions: "风险支撑区域",
     projectDescription:
       "一个由激活状态驱动的细粒度多模态安全审计框架：先检测回复中的不安全片段，再定位支撑风险判断的图像区域。",
-    projectLink: "查看代码仓库",
+    projectLink: "代码仓库",
     projectResultsLabel: "项目结果",
     newDataset: "新数据集",
     opensInNewTab: "（在新标签页中打开）",
@@ -282,6 +311,24 @@ const publications: Publication[] = [
     },
     imageWidth: 1000,
     imageHeight: 534,
+  },
+];
+
+const awards: Award[] = [
+  {
+    year: "2026",
+    title: { en: "Queen Mary Prize", zh: "Queen Mary Prize" },
+  },
+  {
+    year: "2025",
+    title: {
+      en: "BUPT First-Class Scholarship",
+      zh: "北京邮电大学一等奖学金",
+    },
+  },
+  {
+    year: "2024",
+    title: { en: "National Scholarship", zh: "国家奖学金" },
   },
 ];
 
@@ -532,37 +579,112 @@ export default function Home() {
           </div>
         </section>
 
+        <section
+          className="awards-section section-pad"
+          id="awards"
+          aria-labelledby="awards-heading"
+        >
+          <div className="section-heading">
+            <h2 id="awards-heading">{copy.awardsHeading}</h2>
+          </div>
+
+          <ol className="award-list" aria-label={copy.awardsListLabel}>
+            {awards.map((award) => (
+              <li className="award-item" key={award.year}>
+                <time dateTime={award.year}>{award.year}</time>
+                <span className="award-mark" aria-hidden="true">
+                  ✦
+                </span>
+                <h3
+                  lang={language === "zh" && award.year === "2026" ? "en" : undefined}
+                >
+                  {award.title[language]}
+                </h3>
+              </li>
+            ))}
+          </ol>
+        </section>
+
         <section className="project-section section-pad" id="project">
           <div className="section-heading">
             <h2>{copy.projectHeading}</h2>
           </div>
 
           <div className="project-panel">
-            <div className="project-copy">
-              <h3>Activation Revelation</h3>
-              <p>{copy.projectDescription}</p>
+            <div className="project-topline">
+              <div>
+                <span className="project-kicker">{copy.projectKicker}</span>
+                <h3>Activation Revelation</h3>
+              </div>
               <ExternalLink
-                className="project-link"
+                className="project-link project-repository"
                 href="https://github.com/Tianchenggg/Activation-Revelation"
                 language={language}
               >
-                {copy.projectLink}
+                <img
+                  src="/brand/github-mark.svg"
+                  alt=""
+                  width="17"
+                  height="17"
+                  aria-hidden="true"
+                />
+                <span>{copy.projectLink}</span>
               </ExternalLink>
             </div>
-            <div className="metric-list" aria-label={copy.projectResultsLabel}>
-              <div>
-                <strong>+7.2%</strong>
-                <span>Macro-F1</span>
+
+            <div className="project-main">
+              <div className="project-flow">
+                <div className="project-flow-heading">
+                  <span>{copy.projectFlowLabel}</span>
+                  <span aria-hidden="true">01—03</span>
+                </div>
+                <ol aria-label={copy.projectFlowLabel}>
+                  <li>
+                    <span aria-hidden="true">01</span>
+                    <span
+                      className="project-flow-visual is-response"
+                      aria-hidden="true"
+                    />
+                    <strong>{copy.projectModelResponse}</strong>
+                  </li>
+                  <li>
+                    <span aria-hidden="true">02</span>
+                    <span
+                      className="project-flow-visual is-segments"
+                      aria-hidden="true"
+                    />
+                    <strong>{copy.projectUnsafeSegments}</strong>
+                  </li>
+                  <li>
+                    <span aria-hidden="true">03</span>
+                    <span
+                      className="project-flow-visual is-regions"
+                      aria-hidden="true"
+                    />
+                    <strong>{copy.projectSupportingRegions}</strong>
+                  </li>
+                </ol>
               </div>
-              <div>
-                <strong>+26.9%</strong>
-                <span>ACC@0.5</span>
-              </div>
-              <div>
-                <strong>ARGUS</strong>
-                <span>{copy.newDataset}</span>
+
+              <div className="project-copy">
+                <p>{copy.projectDescription}</p>
               </div>
             </div>
+
+            <dl className="metric-list" aria-label={copy.projectResultsLabel}>
+              <div>
+                <dt>Macro-F1</dt>
+                <dd>+7.2%</dd>
+              </div>
+              <div>
+                <dt>ACC@0.5</dt>
+                <dd>+26.9%</dd>
+              </div>
+              <div>
+                <dt>{copy.newDataset}</dt>
+                <dd>ARGUS</dd>
+              </div>
+            </dl>
           </div>
         </section>
       </main>

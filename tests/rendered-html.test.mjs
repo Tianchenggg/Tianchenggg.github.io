@@ -52,6 +52,7 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, /makes life easier/);
   assert.match(html, />Home</);
   assert.match(html, />Research</);
+  assert.match(html, />Awards</);
   assert.match(html, />Project</);
   assert.match(
     html,
@@ -62,7 +63,9 @@ test("server-renders the finished research portfolio", async () => {
   const switcherMarkup = html.match(/<nav class="section-switcher"[\s\S]*?<\/nav>/)?.[0] ?? "";
   assert.equal(switcherMarkup.match(/>Home</g)?.length, 1);
   assert.equal(switcherMarkup.match(/>Research</g)?.length, 1);
+  assert.equal(switcherMarkup.match(/>Awards</g)?.length, 1);
   assert.equal(switcherMarkup.match(/>Project</g)?.length, 1);
+  assert.equal(switcherMarkup.match(/<a\b/g)?.length, 4);
   assert.match(
     html,
     /class="profile-link profile-huggingface"[^>]*href="https:\/\/huggingface\.co\/htcwang"/,
@@ -95,9 +98,45 @@ test("server-renders the finished research portfolio", async () => {
   );
   assert.match(html, />Code</);
   assert.doesNotMatch(html, />DOI</);
+  const awardsMarkup =
+    html.match(/<section class="awards-section section-pad"[\s\S]*?<\/section>/)?.[0] ?? "";
+  assert.match(awardsMarkup, /id="awards"/);
+  assert.match(awardsMarkup, /aria-labelledby="awards-heading"/);
+  assert.match(awardsMarkup, /<h2 id="awards-heading">Awards<\/h2>/);
+  assert.match(
+    awardsMarkup,
+    /<ol class="award-list" aria-label="Awards in reverse chronological order">/,
+  );
+  assert.equal(awardsMarkup.match(/<li class="award-item">/g)?.length, 3);
+  assert.match(awardsMarkup, /<time datetime="2026">2026<\/time>/i);
+  assert.match(awardsMarkup, /Queen Mary Prize/);
+  assert.match(awardsMarkup, /<time datetime="2025">2025<\/time>/i);
+  assert.match(awardsMarkup, /BUPT First-Class Scholarship/);
+  assert.match(awardsMarkup, /<time datetime="2024">2024<\/time>/i);
+  assert.match(awardsMarkup, /National Scholarship/);
+  assert.ok(awardsMarkup.indexOf("2026") < awardsMarkup.indexOf("2025"));
+  assert.ok(awardsMarkup.indexOf("2025") < awardsMarkup.indexOf("2024"));
   assert.match(html, /Activation Revelation/);
   assert.match(html, /<h2>Project<\/h2>/);
   assert.match(html, /<h3>Activation Revelation<\/h3>/);
+  const projectMarkup =
+    html.match(/<section class="project-section section-pad"[\s\S]*?<\/section>/)?.[0] ?? "";
+  assert.match(projectMarkup, /class="project-topline"/);
+  assert.match(projectMarkup, /class="project-main"/);
+  assert.match(projectMarkup, /class="project-flow"/);
+  assert.match(
+    projectMarkup,
+    /<ol aria-label="Safety-auditing workflow">[\s\S]*Model response[\s\S]*Unsafe segments[\s\S]*Supporting image regions[\s\S]*<\/ol>/,
+  );
+  assert.match(
+    projectMarkup,
+    /<dl class="metric-list" aria-label="Project results">/,
+  );
+  assert.equal(projectMarkup.match(/<dt>/g)?.length, 3);
+  assert.equal(projectMarkup.match(/<dd>/g)?.length, 3);
+  assert.match(projectMarkup, /<dt>Macro-F1<\/dt><dd>\+7\.2%<\/dd>/);
+  assert.match(projectMarkup, /<dt>ACC@0\.5<\/dt><dd>\+26\.9%<\/dd>/);
+  assert.match(projectMarkup, /<dt>new dataset<\/dt><dd>ARGUS<\/dd>/);
   assert.match(html, /tiancheng-he-portrait-800\.webp/);
   assert.doesNotMatch(html, /RareAlert/);
   assert.doesNotMatch(html, /Two questions guide my work|Research should leave the lab/);
@@ -130,7 +169,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /--radius-card:\s*24px/);
   assert.match(css, /--muted-light:\s*#5a6f85/i);
   assert.match(css, /aspect-ratio:\s*2\s*\/\s*1/);
-  assert.match(css, /\.site-header-layout\s*{[^}]*display:\s*grid[^}]*grid-template-columns:\s*minmax\(56px,\s*1fr\)\s+minmax\(0,\s*348px\)\s+minmax\(56px,\s*1fr\)/s);
+  assert.match(css, /\.site-header-layout\s*{[^}]*display:\s*grid[^}]*grid-template-columns:\s*minmax\(56px,\s*1fr\)\s+minmax\(0,\s*420px\)\s+minmax\(56px,\s*1fr\)/s);
   assert.match(css, /\.site-header-inner\s*{[^}]*display:\s*block[^}]*width:\s*100%/s);
   assert.match(css, /\.language-toggle\s*{[^}]*min-height:\s*53px/s);
   assert.match(css, /\.language-option\.is-active\s*{/);
@@ -165,8 +204,34 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(baseCardRule, /contain:\s*paint/);
   assert.doesNotMatch(baseCardRule, /backdrop-filter/);
 
+  const switcherRule = cssBlock(css, ".section-switcher {");
+  assert.match(
+    switcherRule,
+    /grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/,
+  );
+
+  const thumbLayoutRule = cssBlock(css, ".section-switcher-thumb {");
+  assert.match(thumbLayoutRule, /width:\s*calc\(100%\s*\/\s*4\)/);
+
+  const dragHandleRule = cssBlock(css, ".section-switcher-drag-handle {");
+  assert.match(dragHandleRule, /width:\s*calc\(100%\s*\/\s*4\)/);
+  assert.doesNotMatch(css, /width:\s*calc\(100%\s*\/\s*3\)/);
+
+  assert.match(
+    css,
+    /#home,\s*#research,\s*#awards,\s*#project\s*{[^}]*scroll-margin-top:/s,
+  );
+
+  const awardItemRule = cssBlock(css, ".award-item {");
+  assert.match(awardItemRule, /contain:\s*paint/);
+  assert.doesNotMatch(awardItemRule, /backdrop-filter/);
+
   const projectPanelRule = cssBlock(css, ".project-panel {");
+  assert.match(projectPanelRule, /contain:\s*paint/);
   assert.doesNotMatch(projectPanelRule, /backdrop-filter/);
+  assert.match(css, /\.project-topline\s*{/);
+  assert.match(css, /\.project-flow\s*{/);
+  assert.match(css, /\.metric-list\s*{[^}]*display:\s*grid/s);
 
   const cardFocusFrames = cssBlock(css, "@keyframes research-card-focus");
   assert.match(cardFocusFrames, /transform:\s*translate3d/);
@@ -196,6 +261,25 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.doesNotMatch(css, /\.hero-socials\s*{|\.hero-social-link\s*{/);
   assert.doesNotMatch(layout, /AI Researcher/i);
   assert.match(switcher, /aria-current/);
+  const sectionSource =
+    switcher.match(/const sections = \[[\s\S]*?\] as const;/)?.[0] ?? "";
+  assert.match(sectionSource, /id:\s*"home"/);
+  assert.match(sectionSource, /id:\s*"research"/);
+  assert.match(sectionSource, /id:\s*"awards"/);
+  assert.match(sectionSource, /id:\s*"project"/);
+  assert.equal(sectionSource.match(/id:\s*"/g)?.length, 4);
+  assert.ok(
+    sectionSource.indexOf('id: "home"') <
+      sectionSource.indexOf('id: "research"'),
+  );
+  assert.ok(
+    sectionSource.indexOf('id: "research"') <
+      sectionSource.indexOf('id: "awards"'),
+  );
+  assert.ok(
+    sectionSource.indexOf('id: "awards"') <
+      sectionSource.indexOf('id: "project"'),
+  );
   assert.match(switcher, /requestAnimationFrame/);
   assert.match(switcher, /navigationLock/);
   assert.match(switcher, /releaseNavigationAfterIdle/);
@@ -234,6 +318,10 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(page, /onClick=\{\(\) => setLanguagePreference\(nextLanguage\)\}/);
   assert.match(page, /switchLanguage:\s*"切换为英文"/);
   assert.doesNotMatch(page, /aria-pressed/);
+  assert.equal(page.match(/awards:\s*"Awards"/g)?.length, 1);
+  assert.equal(page.match(/awards:\s*"奖项"/g)?.length, 1);
+  assert.match(page, /awardsListLabel:\s*"Awards in reverse chronological order"/);
+  assert.match(page, /awardsListLabel:\s*"按时间倒序排列的奖项"/);
   assert.match(page, /何天成/);
   assert.doesNotMatch(page, /天成和|何天诚/);
   assert.match(page, /最大的创新，是解决实际问题，让生活更便捷。/);
@@ -244,6 +332,53 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(page, /SaFeR-Steer：基于合成自举与反馈动力学/);
   assert.match(page, /SaFeR-ToolKit：借助虚拟工具调用/);
   assert.match(page, /LiveSearchBench：面向动态知识检索与推理/);
+  const awardsSource =
+    page.match(/const awards: Award\[\] = \[[\s\S]*?\n\];/)?.[0] ?? "";
+  assert.match(
+    awardsSource,
+    /year:\s*"2026"[\s\S]*?title:\s*{\s*en:\s*"Queen Mary Prize",\s*zh:\s*"Queen Mary Prize"\s*}/,
+  );
+  assert.match(
+    awardsSource,
+    /year:\s*"2025"[\s\S]*?title:\s*{[\s\S]*?en:\s*"BUPT First-Class Scholarship",[\s\S]*?zh:\s*"北京邮电大学一等奖学金"[\s\S]*?}/,
+  );
+  assert.match(
+    awardsSource,
+    /year:\s*"2024"[\s\S]*?title:\s*{\s*en:\s*"National Scholarship",\s*zh:\s*"国家奖学金"\s*}/,
+  );
+  assert.ok(
+    awardsSource.indexOf('year: "2026"') <
+      awardsSource.indexOf('year: "2025"'),
+  );
+  assert.ok(
+    awardsSource.indexOf('year: "2025"') <
+      awardsSource.indexOf('year: "2024"'),
+  );
+  assert.match(
+    page,
+    /<section[\s\S]*className="awards-section section-pad"[\s\S]*id="awards"[\s\S]*aria-labelledby="awards-heading"/,
+  );
+  assert.match(page, /<ol className="award-list" aria-label=\{copy\.awardsListLabel\}>/);
+  assert.match(page, /<li className="award-item" key=\{award\.year\}>/);
+  assert.match(page, /<time dateTime=\{award\.year\}>\{award\.year\}<\/time>/);
+  const projectSource =
+    page.match(/<section className="project-section section-pad"[\s\S]*?<\/section>/)?.[0] ?? "";
+  assert.match(projectSource, /className="project-topline"/);
+  assert.match(projectSource, /className="project-main"/);
+  assert.match(projectSource, /className="project-flow"/);
+  assert.match(projectSource, /<ol aria-label=\{copy\.projectFlowLabel\}>/);
+  assert.match(projectSource, /copy\.projectModelResponse/);
+  assert.match(projectSource, /copy\.projectUnsafeSegments/);
+  assert.match(projectSource, /copy\.projectSupportingRegions/);
+  assert.match(
+    projectSource,
+    /<dl className="metric-list" aria-label=\{copy\.projectResultsLabel\}>/,
+  );
+  assert.equal(projectSource.match(/<dt>/g)?.length, 3);
+  assert.equal(projectSource.match(/<dd>/g)?.length, 3);
+  assert.match(page, /projectModelResponse:\s*"模型回复"/);
+  assert.match(page, /projectUnsafeSegments:\s*"不安全片段"/);
+  assert.match(page, /projectSupportingRegions:\s*"风险支撑区域"/);
   assert.match(page, /opensInNewTab/);
   assert.match(page, /publication\.imageAlt\[language\]/);
   assert.doesNotMatch(page, /loading=\{index === 0/);

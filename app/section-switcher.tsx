@@ -12,6 +12,7 @@ import {
 const sections = [
   { id: "home", labelKey: "home" },
   { id: "research", labelKey: "research" },
+  { id: "awards", labelKey: "awards" },
   { id: "project", labelKey: "project" },
 ] as const;
 
