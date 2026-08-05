@@ -1092,7 +1092,7 @@ a:focus-visible .link-arrow {
 .award-item {
   position: relative;
   display: grid;
-  grid-template-columns: auto 30px minmax(0, 1fr);
+  grid-template-columns: auto 42px minmax(0, 1fr);
   gap: 12px;
   align-items: center;
   min-height: 108px;
@@ -1134,19 +1134,49 @@ a:focus-visible .link-arrow {
   line-height: 1;
 }
 
-.award-mark {
+.award-icon {
   position: relative;
   z-index: 1;
   display: grid;
-  width: 27px;
-  height: 27px;
+  width: 42px;
+  height: 42px;
   place-items: center;
-  border: 1px solid rgb(60 107 176 / 0.2);
+}
+
+.award-icon img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.award-icon.is-qmul {
+  width: 36px;
+  justify-self: center;
+  overflow: hidden;
+}
+
+.award-icon.is-qmul img {
+  position: absolute;
+  top: 50%;
+  left: 1px;
+  width: auto;
+  height: 44px;
+  max-width: none;
+  transform: translateY(-50%);
+}
+
+.award-icon.is-bupt img {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  color: var(--accent);
-  background: linear-gradient(145deg, #fff, #dceaff);
-  box-shadow: inset 0 1px 0 #fff;
-  font-size: 0.69rem;
+}
+
+.award-icon.is-national img {
+  width: 42px;
+  height: 42px;
 }
 
 .award-item h3 {
@@ -1721,8 +1751,8 @@ a:focus-visible .link-arrow {
   }
 
   .award-item {
-    grid-template-columns: 66px 28px minmax(0, 1fr);
-    min-height: 78px;
+    grid-template-columns: 66px 42px minmax(0, 1fr);
+    min-height: 86px;
     padding: 13px 15px;
     border-radius: 17px;
   }

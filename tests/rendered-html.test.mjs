@@ -130,6 +130,14 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(awardsMarkup, /BUPT First-Class Scholarship/);
   assert.match(awardsMarkup, /<time datetime="2024">2024<\/time>/i);
   assert.match(awardsMarkup, /National Scholarship/);
+  assert.match(awardsMarkup, /\/brand\/qmul-logo\.svg/);
+  assert.match(awardsMarkup, /Queen Mary University of London logo/);
+  assert.match(awardsMarkup, /\/brand\/bupt-seal\.jpg/);
+  assert.match(awardsMarkup, /BUPT emblem/);
+  assert.match(awardsMarkup, /\/brand\/prc-national-emblem\.png/);
+  assert.match(awardsMarkup, /National Emblem of the People’s Republic of China/);
+  assert.equal(awardsMarkup.match(/class="award-icon /g)?.length, 3);
+  assert.doesNotMatch(awardsMarkup, /class="award-mark"|>✦</);
   assert.ok(awardsMarkup.indexOf("2026") < awardsMarkup.indexOf("2025"));
   assert.ok(awardsMarkup.indexOf("2025") < awardsMarkup.indexOf("2024"));
   assert.match(html, /Activation Revelation/);
@@ -194,6 +202,9 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /\.hero-affiliations\s*{/);
   assert.match(css, /\.hero-profiles\s*{/);
   assert.match(css, /\.profile-link\s*{/);
+  assert.match(css, /\.award-icon\.is-qmul\s*{/);
+  assert.match(css, /\.award-icon\.is-bupt img\s*{/);
+  assert.match(css, /\.award-icon\.is-national img\s*{/);
   assert.match(css, /min-height:\s*100svh/);
   assert.match(css, /@supports\s*\(animation-timeline:\s*view\(\)\)/);
   assert.match(css, /animation-timeline:\s*view\(block\)/);
@@ -476,6 +487,8 @@ test("ships the GitHub Pages export and social assets", async () => {
     access(new URL("../out/brand/github-mark.svg", import.meta.url)),
     access(new URL("../out/brand/hust-seal.jpg", import.meta.url)),
     access(new URL("../out/brand/bupt-seal.jpg", import.meta.url)),
+    access(new URL("../out/brand/qmul-logo.svg", import.meta.url)),
+    access(new URL("../out/brand/prc-national-emblem.png", import.meta.url)),
     access(new URL("../scripts/prepare-pages.mjs", import.meta.url)),
   ]);
 

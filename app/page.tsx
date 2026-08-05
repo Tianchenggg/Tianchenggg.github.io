@@ -27,6 +27,13 @@ type Publication = {
 type Award = {
   year: string;
   title: LocalizedText;
+  icon: {
+    src: string;
+    alt: LocalizedText;
+    width: number;
+    height: number;
+    className: string;
+  };
 };
 
 const LANGUAGE_STORAGE_KEY = "tiancheng-portfolio-language";
@@ -318,6 +325,16 @@ const awards: Award[] = [
   {
     year: "2026",
     title: { en: "Queen Mary Prize", zh: "Queen Mary Prize" },
+    icon: {
+      src: "/brand/qmul-logo.svg",
+      alt: {
+        en: "Queen Mary University of London logo",
+        zh: "伦敦玛丽女王大学标志",
+      },
+      width: 218,
+      height: 58,
+      className: "is-qmul",
+    },
   },
   {
     year: "2025",
@@ -325,10 +342,27 @@ const awards: Award[] = [
       en: "BUPT First-Class Scholarship",
       zh: "北京邮电大学一等奖学金",
     },
+    icon: {
+      src: "/brand/bupt-seal.jpg",
+      alt: { en: "BUPT emblem", zh: "北京邮电大学校徽" },
+      width: 128,
+      height: 128,
+      className: "is-bupt",
+    },
   },
   {
     year: "2024",
     title: { en: "National Scholarship", zh: "国家奖学金" },
+    icon: {
+      src: "/brand/prc-national-emblem.png",
+      alt: {
+        en: "National Emblem of the People’s Republic of China",
+        zh: "中华人民共和国国徽",
+      },
+      width: 128,
+      height: 128,
+      className: "is-national",
+    },
   },
 ];
 
@@ -592,8 +626,15 @@ export default function Home() {
             {awards.map((award) => (
               <li className="award-item" key={award.year}>
                 <time dateTime={award.year}>{award.year}</time>
-                <span className="award-mark" aria-hidden="true">
-                  ✦
+                <span className={`award-icon ${award.icon.className}`}>
+                  <img
+                    src={award.icon.src}
+                    alt={award.icon.alt[language]}
+                    width={award.icon.width}
+                    height={award.icon.height}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </span>
                 <h3
                   lang={language === "zh" && award.year === "2026" ? "en" : undefined}
