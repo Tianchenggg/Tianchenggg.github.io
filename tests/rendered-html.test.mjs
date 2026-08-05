@@ -19,6 +19,22 @@ function cssBlock(source, marker) {
   assert.fail(`Missing closing brace: ${marker}`);
 }
 
+function assertCompositorOnlyKeyframes(source, name) {
+  const frames = cssBlock(source, `@keyframes ${name}`);
+  const properties = [
+    ...new Set(
+      [...frames.matchAll(/\b([a-z-]+)\s*:/gi)].map((match) => match[1]),
+    ),
+  ].sort();
+
+  assert.deepEqual(
+    properties,
+    ["opacity", "transform"],
+    `${name} must animate only opacity and transform`,
+  );
+  assert.doesNotMatch(frames, /(?:^|-)filter\s*:/i);
+}
+
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
@@ -222,11 +238,17 @@ test("ships the GitHub Pages export and social assets", async () => {
     /#home,\s*#research,\s*#awards,\s*#project\s*{[^}]*scroll-margin-top:/s,
   );
 
-  const awardItemRule = cssBlock(css, ".award-item {");
+  const awardItemRule =
+    [...css.matchAll(/\.award-item\s*{([^}]*)}/gs)]
+      .map((match) => match[1])
+      .find((rule) => /contain:\s*paint/.test(rule)) ?? "";
   assert.match(awardItemRule, /contain:\s*paint/);
   assert.doesNotMatch(awardItemRule, /backdrop-filter/);
 
-  const projectPanelRule = cssBlock(css, ".project-panel {");
+  const projectPanelRule =
+    [...css.matchAll(/\.project-panel\s*{([^}]*)}/gs)]
+      .map((match) => match[1])
+      .find((rule) => /contain:\s*paint/.test(rule)) ?? "";
   assert.match(projectPanelRule, /contain:\s*paint/);
   assert.doesNotMatch(projectPanelRule, /backdrop-filter/);
   assert.match(css, /\.project-topline\s*{/);
@@ -241,7 +263,15 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(heroFrames, /opacity:/);
   assert.doesNotMatch(heroFrames, /scale:|transform:/);
 
+  assertCompositorOnlyKeyframes(css, "award-card-focus");
+  assertCompositorOnlyKeyframes(css, "project-panel-reveal");
+  assertCompositorOnlyKeyframes(css, "project-layer-reveal");
+
   const viewTimelineRules = cssBlock(css, "@supports (animation-timeline: view())");
+  assert.match(
+    viewTimelineRules,
+    /@media\s*\(prefers-reduced-motion:\s*no-preference\)\s*{/,
+  );
   assert.match(
     viewTimelineRules,
     /\.hero\s*{[^}]*animation:\s*hero-deemphasize linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*exit 0% exit 68%/s,
@@ -250,11 +280,50 @@ test("ships the GitHub Pages export and social assets", async () => {
     viewTimelineRules,
     /\.publication-card\s*{[^}]*animation:\s*research-card-focus linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*cover 0% cover 100%/s,
   );
+  assert.match(
+    viewTimelineRules,
+    /\.awards-section \.section-heading\s*{[^}]*animation:\s*research-heading-focus linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*cover 0% cover 100%/s,
+  );
+  assert.match(
+    viewTimelineRules,
+    /\.award-item\s*{[^}]*animation:\s*award-card-focus linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*cover 0% cover 88%/s,
+  );
+  assert.match(
+    viewTimelineRules,
+    /\.award-item:nth-child\(2\)\s*{[^}]*animation-range:\s*cover 6% cover 94%/s,
+  );
+  assert.match(
+    viewTimelineRules,
+    /\.award-item:nth-child\(3\)\s*{[^}]*animation-range:\s*cover 12% cover 100%/s,
+  );
+  assert.match(
+    viewTimelineRules,
+    /\.project-section \.section-heading\s*{[^}]*animation:\s*project-layer-reveal linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*entry 0% entry 100%/s,
+  );
+  assert.match(
+    viewTimelineRules,
+    /\.project-panel\s*{[^}]*animation:\s*project-panel-reveal linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*entry 0% cover 45%/s,
+  );
+  assert.match(
+    viewTimelineRules,
+    /\.project-topline,\s*\.project-main,\s*\.metric-list\s*{[^}]*animation:\s*project-layer-reveal linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*entry 0% entry 100%/s,
+  );
+  assert.match(
+    viewTimelineRules,
+    /\.project-panel:focus-within,\s*\.project-topline:focus-within\s*{[^}]*opacity:\s*1\s*!important[^}]*transform:\s*none\s*!important/s,
+  );
   assert.match(viewTimelineRules, /\.publication-card:focus-within\s*{[^}]*opacity:\s*1\s*!important/s);
   assert.match(viewTimelineRules, /\.publication-card:hover\s*{[^}]*opacity:\s*1\s*!important/s);
 
   const reducedMotionRules = cssBlock(css, "@media (prefers-reduced-motion: reduce)");
-  assert.match(reducedMotionRules, /\.hero,[\s\S]*\.publication-card\s*{/);
+  assert.match(reducedMotionRules, /\.hero,[\s\S]*\.publication-card,/);
+  const reducedAnimationReset = reducedMotionRules.match(
+    /\.hero,\s*\.research \.section-heading,\s*\.publication-card,\s*\.awards-section \.section-heading,\s*\.award-item,\s*\.project-section \.section-heading,\s*\.project-panel,\s*\.project-topline,\s*\.project-main,\s*\.metric-list\s*{([^}]*)}/s,
+  );
+  assert.ok(reducedAnimationReset, "Missing reduced-motion reset for Awards and Project");
+  assert.match(reducedAnimationReset[1], /animation:\s*none\s*!important/);
+  assert.match(reducedAnimationReset[1], /opacity:\s*1/);
+  assert.match(reducedAnimationReset[1], /transform:\s*none/);
   assert.match(reducedMotionRules, /animation:\s*none\s*!important/);
   assert.match(reducedMotionRules, /filter:\s*none/);
   assert.match(reducedMotionRules, /opacity:\s*1/);

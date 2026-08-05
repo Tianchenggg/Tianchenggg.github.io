@@ -825,6 +825,70 @@ img {
   }
 }
 
+@keyframes award-card-focus {
+  0% {
+    opacity: 0.06;
+    transform: translate3d(0, 56px, 0);
+  }
+
+  26% {
+    opacity: 0.7;
+  }
+
+  38%,
+  68% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  84% {
+    opacity: 0.5;
+    transform: translate3d(0, -3px, 0);
+  }
+
+  100% {
+    opacity: 0.24;
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+@keyframes project-panel-reveal {
+  0% {
+    opacity: 0.06;
+    transform: translate3d(0, 82px, 0);
+  }
+
+  34% {
+    opacity: 0.58;
+  }
+
+  70% {
+    opacity: 0.92;
+    transform: translate3d(0, 8px, 0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes project-layer-reveal {
+  0% {
+    opacity: 0.05;
+    transform: translate3d(0, 32px, 0);
+  }
+
+  46% {
+    opacity: 0.76;
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     .hero {
@@ -843,6 +907,52 @@ img {
       animation: research-card-focus linear both;
       animation-timeline: view(block);
       animation-range: cover 0% cover 100%;
+    }
+
+    .awards-section .section-heading {
+      animation: research-heading-focus linear both;
+      animation-timeline: view(block);
+      animation-range: cover 0% cover 100%;
+    }
+
+    .award-item {
+      animation: award-card-focus linear both;
+      animation-timeline: view(block);
+      animation-range: cover 0% cover 88%;
+    }
+
+    .award-item:nth-child(2) {
+      animation-range: cover 6% cover 94%;
+    }
+
+    .award-item:nth-child(3) {
+      animation-range: cover 12% cover 100%;
+    }
+
+    .project-section .section-heading {
+      animation: project-layer-reveal linear both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    .project-panel {
+      animation: project-panel-reveal linear both;
+      animation-timeline: view(block);
+      animation-range: entry 0% cover 45%;
+    }
+
+    .project-topline,
+    .project-main,
+    .metric-list {
+      animation: project-layer-reveal linear both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    .project-panel:focus-within,
+    .project-topline:focus-within {
+      opacity: 1 !important;
+      transform: none !important;
     }
 
     .publication-card:focus-within {
@@ -1816,11 +1926,19 @@ a:focus-visible .link-arrow {
 
   .hero,
   .research .section-heading,
-  .publication-card {
+  .publication-card,
+  .awards-section .section-heading,
+  .award-item,
+  .project-section .section-heading,
+  .project-panel,
+  .project-topline,
+  .project-main,
+  .metric-list {
     animation: none !important;
     filter: none;
     opacity: 1;
     scale: 1;
+    transform: none;
     translate: 0 0;
   }
 }
