@@ -118,6 +118,46 @@ test("awards remain one full-width row per item at every CSS breakpoint", () => 
   }
 });
 
+test("Queen Mary crown preserves every original path inside a padded standalone asset", async () => {
+  const [logo, crown] = await Promise.all([
+    readFile(new URL("../public/brand/qmul-logo.svg", import.meta.url), "utf8"),
+    readFile(new URL("../public/brand/qmul-crown.svg", import.meta.url), "utf8"),
+  ]);
+  const paths = source => [...source.matchAll(/<path\b[^>]*\bd="([^"]+)"/g)]
+    .map(([, path]) => path.replace(/\s+/g, " ").trim());
+  assert.equal(paths(crown).length, 7, "The crown must include its center, both points, both flourishes, base, and top");
+  assert.deepEqual(paths(crown), paths(logo).slice(-7), "The standalone crown must not redraw or trim the original artwork");
+  assert.match(crown, /viewBox="-198 366 56 48"/,
+    "The crown's viewBox needs padding around all seven original paths");
+  assert.match(logo, /viewBox="-196 368\.2 217\.6 57\.8"/, "The full university logo must remain intact");
+  assert.doesNotMatch(crown, /<(?:clipPath|mask)\b|\btransform\s*=/,
+    "The standalone asset must preserve its original geometry without clipping");
+});
+
+test("Queen Mary crown stays contained at desktop and mobile sizes without CSS cropping", () => {
+  assert.match(rulesFor(".award-icon")[0], /width:\s*64px\s*;/);
+  const imageRules = rulesFor(".award-icon img").join("\n");
+  assert.match(imageRules, /object-fit:\s*contain\s*;/);
+  assert.match(imageRules, /max-width:\s*100%\s*;/);
+  assert.match(imageRules, /max-height:\s*100%\s*;/);
+  const crownRules = rulesFor(".award-icon.is-qmul img");
+  assert.ok(crownRules.length, "The crown needs explicit responsive sizing");
+  assert.match(crownRules[0], /width:\s*60px\s*;/);
+  for (const rule of crownRules) {
+    assert.match(rule, /height:\s*auto\s*;/, "Crown sizing must preserve the asset's aspect ratio");
+  }
+  const iconRules = [
+    ...rulesFor(".award-icon"), ...rulesFor(".award-icon img"),
+    ...rulesFor(".award-icon.is-qmul"), ...crownRules,
+  ].join("\n");
+  assert.doesNotMatch(iconRules, /overflow(?:-[xy])?:\s*(?:hidden|clip)\b|position:\s*absolute\b|\btransform\s*:/,
+    "The complete crown must fit normally, not be extracted from the wordmark by cropping or offsets");
+  const narrow = [...css.matchAll(/@media\s*\(max-width:\s*700px\)/g)]
+    .map(match => blockAt(match[0], match.index).body).join("\n");
+  assert.match(rulesFor(".award-icon", narrow).join("\n"), /width:\s*46px\s*;/);
+  assert.match(rulesFor(".award-icon.is-qmul img", narrow).join("\n"), /width:\s*44px\s*;/);
+});
+
 test("fluid colors follow independent, visibly flowing compositor-only paths", () => {
   const paths = [];
   for (const color of ["gold", "rose", "violet", "cyan"]) {

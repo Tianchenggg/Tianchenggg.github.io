@@ -351,13 +351,13 @@ const awards: Award[] = [
     year: "2026",
     title: { en: "Queen Mary Prize", zh: "Queen Mary Prize" },
     icon: {
-      src: "/brand/qmul-logo.svg",
+      src: "/brand/qmul-crown.svg",
       alt: {
         en: "Queen Mary University of London logo",
         zh: "伦敦玛丽女王大学标志",
       },
-      width: 218,
-      height: 58,
+      width: 56,
+      height: 48,
       className: "is-qmul",
     },
   },

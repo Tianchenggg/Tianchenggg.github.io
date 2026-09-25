@@ -1212,20 +1212,9 @@ a:focus-visible .link-arrow {
   object-fit: contain;
 }
 
-.award-icon.is-qmul {
-  width: 52px;
-  justify-self: center;
-  overflow: hidden;
-}
-
 .award-icon.is-qmul img {
-  position: absolute;
-  top: 50%;
-  left: 1px;
-  width: auto;
-  height: 64px;
-  max-width: none;
-  transform: translateY(-50%);
+  width: 60px;
+  height: auto;
 }
 
 .award-icon.is-bupt img {
@@ -1732,8 +1721,7 @@ a:focus-visible .link-arrow {
   }
 
   .award-icon { width: 46px; height: 46px; }
-  .award-icon.is-qmul { width: 38px; }
-  .award-icon.is-qmul img { height: 47px; }
+  .award-icon.is-qmul img { width: 44px; height: auto; }
   .award-icon.is-bupt img { width: 44px; height: 44px; }
   .award-icon.is-national img { width: 46px; height: 46px; }
 

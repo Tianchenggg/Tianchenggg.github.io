@@ -210,7 +210,9 @@ test("server-renders the finished research portfolio", async t => {
   assert.match(awardsMarkup, /BUPT First-Class Scholarship/);
   assert.match(awardsMarkup, /<time datetime="2024">2024<\/time>/i);
   assert.match(awardsMarkup, /National Scholarship/);
-  assert.match(awardsMarkup, /\/brand\/qmul-logo\.svg/);
+  assert.match(awardsMarkup, /<img\b[^>]*src="\/brand\/qmul-crown\.svg"[^>]*width="56"[^>]*height="48"/);
+  assert.doesNotMatch(awardsMarkup, /\/brand\/qmul-logo\.svg/,
+    "The award must render the complete standalone crown, not a CSS-cropped wordmark");
   assert.match(awardsMarkup, /Queen Mary University of London logo/);
   assert.match(awardsMarkup, /\/brand\/bupt-seal\.jpg/);
   assert.match(awardsMarkup, /BUPT emblem/);
@@ -265,6 +267,8 @@ test("ships the GitHub Pages export and social assets", async () => {
 
   assert.equal(docsHtml, html);
   assert.match(html, /Tiancheng He — AI Scientist/);
+  assert.match(html, /src="\/brand\/qmul-crown\.svg"/,
+    "The published static page must use the standalone crown asset too");
   assert.match(layout, /https:\/\/tianchenggg\.github\.io/);
   assert.match(layout, /\/og-scientist\.png/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
@@ -281,7 +285,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(cssRulesForSelector(css, ".hero-affiliations").join("\n"), /display:\s*grid/);
   assert.match(cssRulesForSelector(css, ".hero-profiles").join("\n"), /display:\s*grid/);
   assert.match(css, /\.profile-link\s*{/);
-  assert.match(css, /\.award-icon\.is-qmul\s*{/);
+  assert.match(css, /\.award-icon\.is-qmul img\s*{/);
   assert.match(css, /\.award-icon\.is-bupt img\s*{/);
   assert.match(css, /\.award-icon\.is-national img\s*{/);
   assert.match(css, /min-height:\s*100svh/);
@@ -474,6 +478,8 @@ test("ships the GitHub Pages export and social assets", async () => {
     access(new URL("../out/brand/hust-seal.jpg", import.meta.url)),
     access(new URL("../out/brand/bupt-seal.jpg", import.meta.url)),
     access(new URL("../out/brand/qmul-logo.svg", import.meta.url)),
+    access(new URL("../out/brand/qmul-crown.svg", import.meta.url)),
+    access(new URL("../docs/brand/qmul-crown.svg", import.meta.url)),
     access(new URL("../out/brand/prc-national-emblem.png", import.meta.url)),
     access(new URL("../scripts/prepare-pages.mjs", import.meta.url)),
     ...lifePhotos.flatMap(photo => ["out", "docs"].flatMap(directory =>
