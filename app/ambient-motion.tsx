@@ -11,7 +11,7 @@ export default function AmbientMotionControl({ labels }: { labels: { pause: stri
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const visible = new Set<Element>();
     const sync = () => {
-      const enabled = !document.hidden && !motion.matches && !paused;
+      const enabled = !document.hidden && !motion.matches && !paused && !document.querySelector("dialog[open]");
       elements.forEach(element => { element.dataset.running = String(enabled && visible.has(element)); });
     };
     const observer = new IntersectionObserver(entries => {
@@ -20,10 +20,17 @@ export default function AmbientMotionControl({ labels }: { labels: { pause: stri
     });
     sync();
     elements.forEach(element => observer.observe(element));
+    // A fullscreen photograph hides every color field. Stop the underlying
+    // composited layers until the native viewer closes, without a render loop.
+    const dialogs = new window.MutationObserver(sync);
+    document.querySelectorAll("dialog").forEach(dialog => {
+      dialogs.observe(dialog, { attributes: true, attributeFilter: ["open"] });
+    });
     document.addEventListener("visibilitychange", sync);
     motion.addEventListener("change", sync);
     return () => {
       observer.disconnect();
+      dialogs.disconnect();
       document.removeEventListener("visibilitychange", sync);
       motion.removeEventListener("change", sync);
       elements.forEach(element => { element.dataset.running = "false"; });

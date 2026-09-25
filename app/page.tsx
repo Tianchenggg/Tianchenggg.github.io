@@ -108,7 +108,8 @@ const siteCopy = {
     statement:
       "Research should solve real-world problems and improve people’s lives.",
     focusLabel: "Research focus",
-    creativity: "LLM creativity",
+    creativityAgent: "Agent ",
+    creativity: "Creativity",
     postTraining: "Post-training",
     interpretability: "Interpretability",
     motion: { pause: "Pause background motion", resume: "Resume background motion" },
@@ -142,7 +143,8 @@ const siteCopy = {
     name: "何天成",
     statement: "研究应解决现实问题，改善人们的生活。",
     focusLabel: "研究方向",
-    creativity: "大模型创造力",
+    creativityAgent: "智能体",
+    creativity: "创造力",
     postTraining: "后训练",
     interpretability: "可解释性",
     motion: { pause: "暂停背景动效", resume: "继续背景动效" },
@@ -450,6 +452,7 @@ export default function Home() {
 
   return (
     <div className="site-language-root" data-language={language} lang={language === "zh" ? "zh-CN" : "en"}>
+      <FluidBackdrop variant="page" />
       <a className="skip-link" href="#content">
         {copy.skipLink}
       </a>
@@ -483,7 +486,7 @@ export default function Home() {
 
       <main className="portfolio-shell" id="content">
         <section className="hero section-pad" id="home">
-          <div className="hero-spectrum" data-ambient="" data-running="false" aria-hidden="true" />
+          <FluidBackdrop variant="hero" />
           <div className="hero-copy">
             <p className="hero-eyebrow">{copy.role}</p>
             <h1>
@@ -499,7 +502,7 @@ export default function Home() {
             <div className="hero-focus-block">
               <span className="hero-focus-label">{copy.focusLabel}</span>
               <p className="hero-focus-values">
-                <strong>{copy.creativity}</strong>
+                <strong className="focus-creativity"><span>{copy.creativityAgent}</span><span className="creativity-spectrum">{copy.creativity}</span></strong>
                 <strong>{copy.postTraining}</strong>
                 <strong>{copy.interpretability}</strong>
               </p>

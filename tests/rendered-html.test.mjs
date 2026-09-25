@@ -108,14 +108,21 @@ test("server-renders the finished research portfolio", async t => {
   assert.match(headerMarkup, /<button\b[^>]*class="spectrum-toggle"[^>]*aria-label="Pause background motion"/);
   assert.equal(html.match(/class="spectrum-toggle"/g)?.length, 1, "A single header control must pause all ambient motion");
   const ambientMarkup = [...html.matchAll(/<[^>]+\bdata-ambient(?:="[^"]*")?[^>]*>/g)].map(([element]) => element);
-  assert.equal(ambientMarkup.length, 10, "Hero, publications, and awards must share ambient-motion control");
+  assert.equal(ambientMarkup.length, 11, "Page, hero, publications, and awards must share ambient-motion control");
   for (const element of ambientMarkup) {
     assert.match(element, /data-running="false"/, "Ambient motion must wait for visibility before starting");
     assert.match(element, /aria-hidden="true"/, "Decorative motion must not enter the accessibility tree");
   }
   const fluidMarkup = [...html.matchAll(/<div class="card-fluid"[^>]*>[\s\S]*?<\/div>/g)].map(([element]) => element);
   assert.equal(fluidMarkup.length, 9, "Each publication and award row must have a shared fluid backdrop");
-  for (const backdrop of fluidMarkup) {
+  const pageBackdrop = html.match(/<div class="page-spectrum"[^>]*>[\s\S]*?<\/div>/)?.[0] ?? "";
+  const heroBackdrop = html.match(/<div class="hero-spectrum"[^>]*>[\s\S]*?<\/div>/)?.[0] ?? "";
+  assert.ok(pageBackdrop, "The overall page must have one decorative flowing backdrop");
+  assert.ok(heroBackdrop, "Home must have its own composed color fields");
+  assert.equal(html.match(/class="page-spectrum"/g)?.length, 1);
+  assert.equal(html.match(/class="hero-spectrum"/g)?.length, 1);
+  assert.ok(html.indexOf(pageBackdrop) < html.indexOf(headerMarkup), "The page backdrop must not be nested inside the navigation");
+  for (const backdrop of [...fluidMarkup, pageBackdrop, heroBackdrop]) {
     for (const color of ["gold", "rose", "violet", "cyan"]) {
       assert.match(backdrop, new RegExp(`<span class="fluid-color is-${color}"></span>`));
     }
@@ -129,6 +136,13 @@ test("server-renders the finished research portfolio", async t => {
   const win = new Window();
   t.after(() => win.happyDOM.close());
   const homeDocument = new win.DOMParser().parseFromString(homeMarkup, "text/html");
+  assert.ok(homeDocument.querySelector("#home .hero-spectrum"), "Home colors must remain scoped to the hero");
+  const creativity = homeDocument.querySelector(".focus-creativity");
+  assert.ok(creativity, "The creativity research focus must have its own semantic emphasis");
+  assert.equal(creativity.textContent.replace(/\s+/g, " ").trim(), "Agent Creativity");
+  assert.equal(creativity.querySelector(".creativity-spectrum")?.textContent, "Creativity");
+  assert.equal(creativity.querySelectorAll(".creativity-spectrum").length, 1, "Color only the Creativity word, not the entire research focus");
+  assert.equal(creativity.querySelector("span:not(.creativity-spectrum)")?.textContent.trim(), "Agent");
   const contacts = homeDocument.querySelector("#home .contact-links");
   assert.ok(contacts, "Contact information must be inside Home");
   const email = contacts.querySelector('a[href="mailto:tianchenghe77bupt@gmail.com"]');
@@ -146,7 +160,7 @@ test("server-renders the finished research portfolio", async t => {
   assert.match(html, /\/brand\/github-mark\.svg/);
   assert.match(html, /\/brand\/hust-seal\.jpg/);
   assert.match(html, /\/brand\/bupt-seal\.jpg/);
-  assert.match(html, /LLM creativity/i);
+  assert.doesNotMatch(html, /LLM creativity/i);
   assert.doesNotMatch(html, /large-model safety/i);
   assert.match(html, /Post-training/);
   assert.match(html, /Interpretability/);
@@ -432,7 +446,9 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(page, /SaFeR-ToolKit：借助虚拟工具调用/);
   assert.match(page, /面向动态知识的可证明检索依赖型基准自动构建流程/);
   assert.match(page, /LatticeMind：面向多智能体系统的冲突感知记忆原语/);
-  assert.match(page, /大模型创造力/);
+  assert.match(page, /智能体/);
+  assert.match(page, /创造力/);
+  assert.doesNotMatch(page, /LLM creativity|大模型创造力/i);
   assert.match(page, /后训练/);
   assert.match(page, /可解释性/);
   const awardsSource =

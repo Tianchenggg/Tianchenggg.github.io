@@ -1,6 +1,6 @@
 # Tiancheng He — Research Portfolio
 
-Personal academic homepage for [Tiancheng He](https://github.com/Tianchenggg), featuring six selected works and a research focus on LLM creativity, post-training, and interpretability.
+Personal academic homepage for [Tiancheng He](https://github.com/Tianchenggg), featuring six selected works and a research focus on agent creativity, post-training, and interpretability.
 
 ## Local development
 
@@ -22,6 +22,8 @@ Publication metadata was updated in September 2026 using the author's supplied a
 LatticeMind's overview is Figure 1 from [arXiv:2608.08236](https://arxiv.org/abs/2608.08236), checked against PDF page 4 and exported from the author's original figure as a 1000px WebP. Existing paper figures remain unchanged.
 
 Awards use full-width rows on desktop and mobile. The card backdrops use four independently moving gold, rose, violet, and cyan gradient fields, with a stationary contrast veil that keeps text readable. These are lightweight CSS fluid-style gradients, not a simulation of Apple's internal renderer. The iridescent hero and card colors animate transforms only, pause offscreen or when the tab is hidden, and respect reduced-motion preferences. The header pause control stops all ambient motion. Scroll reveals share one gentle entrance and stay readable on exit.
+
+Home highlights **Agent Creativity / 智能体创造力**, with a static, high-contrast rainbow gradient on **Creativity / 创造力**. Its stronger, independently moving color fields sit above a quieter fixed page glow. Background raster bounds stay close to their containers, and mobile uses only two page-wide fields. Opening the photograph viewer pauses all underlying ambient motion; closing it preserves the user's pause and reduced-motion settings. The gradient text has normal-color and forced-colors fallbacks.
 
 Life replaces the former Project section with ten user-supplied photographs. Desktop rows balance landscape and portrait compositions without cropping; mobile uses a two-column gallery with full-width landscapes. Each photograph has a short bilingual poetic title, without inferred locations or dates. A keyboard-accessible native dialog displays the full-size photographs. Grid images have responsive WebP sources and lazy loading; the lightbox image mounts only when opened. Web derivatives strip EXIF/GPS metadata and leave the uploaded originals untouched. Regenerate them with `node scripts/prepare-life-photos.mjs <upload-directory>`.
 

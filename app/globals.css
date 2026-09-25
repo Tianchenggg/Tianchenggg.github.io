@@ -353,10 +353,9 @@ img {
   outline-offset: 2px;
 }
 
-.portfolio-shell {
+.site-language-root {
   position: relative;
-  min-height: 100vh;
-  overflow: clip;
+  isolation: isolate;
   background:
     radial-gradient(ellipse 40rem 30rem at 90% 7%, rgb(221 122 182 / 0.19), transparent 72%),
     radial-gradient(ellipse 38rem 34rem at 0% 28%, rgb(70 195 221 / 0.17), transparent 72%),
@@ -364,6 +363,25 @@ img {
     radial-gradient(ellipse 38rem 28rem at 0% 76%, rgb(247 173 103 / 0.13), transparent 72%),
     linear-gradient(180deg, #fafbff, var(--page) 52%, #edf2fa);
 }
+
+.portfolio-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  overflow: clip;
+}
+
+.page-spectrum {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  contain: strict;
+  pointer-events: none;
+  opacity: 0.24;
+}
+
+.page-spectrum .fluid-color { inset: -8%; }
 
 .portfolio-shell::before,
 .portfolio-shell::after {
@@ -414,29 +432,22 @@ img {
 .hero-spectrum {
   position: absolute;
   z-index: -1;
-  inset: 4% -10% -3% 20%;
+  inset: -8% -10% -6%;
   overflow: hidden;
   pointer-events: none;
   contain: strict;
-  mask-image: radial-gradient(ellipse, #000 28%, transparent 71%);
+  opacity: 0.82;
+  mask-image: radial-gradient(ellipse, #000 22%, rgb(0 0 0 / 0.8) 48%, transparent 74%);
 }
 
-.hero-spectrum::before,
+.hero-spectrum .fluid-color { inset: -12% -8%; }
+
+/* Keep the reading surface calm while the colors move freely underneath. */
 .hero-spectrum::after {
   position: absolute;
-  inset: 8% -6%;
-  border-radius: 46% 54% 62% 38% / 45% 39% 61% 55%;
-  background: conic-gradient(from 20deg, #65d6e7, #4c87ee, #a480f2, #eb83b9, #ffbb86, #f4dca2, #65d6e7);
-  mask-image: radial-gradient(ellipse, transparent 28%, rgb(0 0 0 / 0.18) 40%, #000 54%, rgb(0 0 0 / 0.5) 63%, transparent 73%);
+  inset: 0;
+  background: linear-gradient(100deg, rgb(250 251 255 / 0.76), rgb(250 251 255 / 0.4) 48%, rgb(250 251 255 / 0.06) 82%);
   content: "";
-  opacity: 0.6;
-  transform: rotate(-24deg) scale(0.96, 0.84);
-}
-
-.hero-spectrum::after {
-  inset: 3% -10% 5% 7%;
-  opacity: 0.26;
-  transform: rotate(18deg) scale(1.06, 0.9);
 }
 
 .spectrum-toggle {
@@ -452,30 +463,6 @@ img {
   background: rgb(255 255 255 / 0.55);
   cursor: pointer;
   pointer-events: auto;
-}
-
-@keyframes spectrum-drift {
-  from { transform: translate3d(-2%, 1%, 0) rotate(-24deg) scale(0.96, 0.84); }
-  to { transform: translate3d(3%, -2%, 0) rotate(14deg) scale(1.06, 0.94); }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .hero-spectrum::before,
-  .hero-spectrum::after {
-    animation: spectrum-drift 22s ease-in-out infinite alternate;
-    animation-play-state: paused;
-  }
-
-  .hero-spectrum::after {
-    animation-duration: 29s;
-    animation-direction: alternate-reverse;
-    animation-delay: -9s;
-  }
-
-  .hero-spectrum[data-running="true"]::before,
-  .hero-spectrum[data-running="true"]::after {
-    animation-play-state: running;
-  }
 }
 
 @media (min-width: 701px) {
@@ -576,6 +563,24 @@ img {
 .hero-focus-values strong {
   color: #34558b;
   font-weight: 650;
+}
+
+.focus-creativity { white-space: nowrap; }
+.creativity-spectrum { color: #7946a8; }
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .creativity-spectrum {
+    background: linear-gradient(105deg, #087374 0%, #365dba 24%, #8545b2 46%, #b33578 68%, #ab4d25 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@media (forced-colors: active) {
+  .creativity-spectrum { background: none; color: CanvasText; }
+  .page-spectrum,
+  .hero-spectrum { display: none; }
 }
 
 .hero-focus-values strong:nth-child(2) {
@@ -965,7 +970,17 @@ img {
   .fluid-color.is-violet { animation-name: fluid-violet; animation-duration: 19s; }
   .fluid-color.is-cyan { animation-name: fluid-cyan; animation-duration: 13s; }
   .publication-card:nth-child(even) { --fluid-phase: -9s; }
-  .card-fluid[data-running="true"] .fluid-color { animation-play-state: running; }
+  .hero-spectrum .fluid-color { animation-duration: 11s; --fluid-phase: -4s; }
+  .hero-spectrum .fluid-color.is-rose { animation-duration: 13s; }
+  .hero-spectrum .fluid-color.is-violet { animation-duration: 15s; }
+  .hero-spectrum .fluid-color.is-cyan { animation-duration: 10s; }
+  .page-spectrum .fluid-color { animation-duration: 23s; --fluid-phase: -11s; }
+  .page-spectrum .fluid-color.is-rose { animation-duration: 27s; }
+  .page-spectrum .fluid-color.is-violet { animation-duration: 29s; }
+  .page-spectrum .fluid-color.is-cyan { animation-duration: 21s; }
+  .card-fluid[data-running="true"] .fluid-color,
+  .hero-spectrum[data-running="true"] .fluid-color,
+  .page-spectrum[data-running="true"] .fluid-color { animation-play-state: running; }
 }
 
 .publication-visual {
@@ -1575,8 +1590,14 @@ a:focus-visible .link-arrow {
   }
 
   .hero-spectrum {
-    inset: 5% -25% 6% -20%;
+    inset: -2% -16% 0%;
+    opacity: 0.76;
   }
+
+  .page-spectrum { opacity: 0.18; }
+  .page-spectrum .fluid-color { inset: 0; }
+  .page-spectrum .is-rose,
+  .page-spectrum .is-violet { display: none; }
 
   .spectrum-toggle {
     width: 42px;

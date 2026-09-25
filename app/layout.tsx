@@ -5,14 +5,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://tianchenggg.github.io"),
   title: "Tiancheng He — AI Scientist",
   description:
-    "Tiancheng He researches LLM creativity, post-training, and interpretability, with a focus on solving real-world problems and improving people’s lives.",
+    "Tiancheng He researches agent creativity, post-training, and interpretability, with a focus on solving real-world problems and improving people’s lives.",
   keywords: [
     "Tiancheng He",
     "何天成",
     "AI scientist",
     "人工智能科学家",
-    "LLM creativity",
-    "大模型创造力",
+    "Agent Creativity",
+    "智能体创造力",
     "post-training",
     "后训练",
     "interpretability",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     url: "/",
     title: "Tiancheng He — AI Scientist",
     description:
-      "LLM creativity, post-training, interpretability, and research that improves people’s lives.",
+      "Agent Creativity, post-training, interpretability, and research that improves people’s lives.",
     siteName: "Tiancheng He",
     images: [
       {
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Tiancheng He — AI Scientist",
     description:
-      "LLM creativity, post-training, interpretability, and research that improves people’s lives.",
+      "Agent Creativity, post-training, interpretability, and research that improves people’s lives.",
     images: ["/og-scientist.png"],
   },
   icons: {

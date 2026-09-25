@@ -76,8 +76,57 @@ test("fluid animation is opt-in to motion preference and gated by the shared con
   const animatedFields = rulesFor(".fluid-color", permitted).join("\n");
   assert.match(animatedFields, /animation:\s*fluid-gold\b[^;]*\binfinite/);
   assert.match(animatedFields, /animation-play-state:\s*paused/);
-  assert.match(rulesFor('.card-fluid[data-running="true"] .fluid-color', permitted).join("\n"),
-    /animation-play-state:\s*running/);
+  for (const surface of ["card-fluid", "hero-spectrum", "page-spectrum"]) {
+    assert.match(rulesFor(`.${surface}[data-running="true"] .fluid-color`, permitted).join("\n"),
+      /animation-play-state:\s*running/, `${surface} must use the shared pause state`);
+  }
+});
+
+test("the hero and page flow behind stationary content without animating expensive effects", () => {
+  for (const surface of ["hero-spectrum", "page-spectrum"]) {
+    const rules = rulesFor(`.${surface}`).join("\n");
+    assert.match(rules, /overflow:\s*hidden/);
+    assert.match(rules, /contain:\s*strict/);
+    assert.match(rules, /pointer-events:\s*none/);
+    assert.doesNotMatch(rules, /\b(?:animation|animation-name|filter|backdrop-filter)\s*:/,
+      "Only the contained color fields should animate, not the full viewport layer");
+    assert.doesNotMatch(rulesFor(`.${surface} .fluid-color`).join("\n"), /\b(?:filter|backdrop-filter)\s*:/);
+  }
+  assert.match(rulesFor(".page-spectrum").join("\n"), /position:\s*fixed/);
+  assert.match(rulesFor(".page-spectrum").join("\n"), /inset:\s*0\s*;/);
+  assert.match(rulesFor(".page-spectrum").join("\n"), /z-index:\s*0/);
+  assert.match(rulesFor(".portfolio-shell").join("\n"), /z-index:\s*1/);
+  assert.match(rulesFor(".hero-spectrum").join("\n"), /position:\s*absolute/);
+  assert.match(rulesFor(".hero-spectrum").join("\n"), /z-index:\s*-1/);
+  const veil = rulesFor(".hero-spectrum::after").join("\n");
+  assert.match(veil, /background:\s*linear-gradient\(/);
+  assert.doesNotMatch(veil, /\banimation(?:-name)?\s*:/, "The hero contrast veil must stay stationary");
+  assert.doesNotMatch(css, /@keyframes\s+spectrum-drift\b/, "The obsolete ring animation must not keep rendering alongside the fluid fields");
+  assert.match(rulesFor(".page-spectrum .is-rose").join("\n"), /display:\s*none/);
+  assert.match(rulesFor(".page-spectrum .is-violet").join("\n"), /display:\s*none/);
+});
+
+test("Creativity has a multicolor treatment with readable browser and forced-color fallbacks", () => {
+  const supportMarker = "@supports ((background-clip: text) or (-webkit-background-clip: text))";
+  const supportIndex = css.indexOf(supportMarker);
+  assert.notEqual(supportIndex, -1, "Transparent text must only be enabled where text clipping is supported");
+  const fallback = rulesFor(".creativity-spectrum", css.slice(0, supportIndex)).join("\n");
+  assert.match(fallback, /color:\s*#[a-f\d]{3,8}\s*;/i);
+  assert.doesNotMatch(fallback, /color:\s*transparent/);
+  const gradient = rulesFor(".creativity-spectrum", blockAt(supportMarker).body).join("\n");
+  assert.match(gradient, /background:\s*linear-gradient\(/);
+  assert.ok(new Set(gradient.match(/#[a-f\d]{6}\b/gi)).size >= 4, "Creativity should show a spectrum, not a two-color tint");
+  assert.match(gradient, /background-clip:\s*text/);
+  assert.match(gradient, /color:\s*transparent/);
+  assert.doesNotMatch(rulesFor(".creativity-spectrum").join("\n"), /\b(?:animation|animation-name|filter)\s*:/,
+    "The colorful word must remain stable and legible as the background moves");
+  const forced = blockAt("@media (forced-colors: active)").body;
+  const forcedText = rulesFor(".creativity-spectrum", forced).join("\n");
+  assert.match(forcedText, /background:\s*none/);
+  assert.match(forcedText, /color:\s*CanvasText/);
+  for (const surface of [".hero-spectrum", ".page-spectrum"]) {
+    assert.match(rulesFor(surface, forced).join("\n"), /display:\s*none/);
+  }
 });
 
 test("color motion stays clipped and underneath stationary reading surfaces", () => {
