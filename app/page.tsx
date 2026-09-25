@@ -8,6 +8,7 @@ import {
 import SectionSwitcher from "./section-switcher";
 import AmbientMotionControl from "./ambient-motion";
 import FluidBackdrop from "./fluid-backdrop";
+import LifeGallery from "./life-gallery";
 
 type Language = "en" | "zh";
 type LocalizedText = Record<Language, string>;
@@ -100,7 +101,7 @@ const siteCopy = {
       home: "Home",
       research: "Research",
       awards: "Awards",
-      project: "Project",
+      life: "Life",
     },
     role: "AI Scientist",
     name: "Tiancheng He",
@@ -118,20 +119,12 @@ const siteCopy = {
     hust: "HUST",
     masters: "Master’s",
     profilesLabel: "Research profiles",
+    contactLabel: "Contact",
+    wechat: "WeChat",
     researchHeading: "Research",
     awardsHeading: "Awards",
     awardsListLabel: "Awards in reverse chronological order",
-    projectHeading: "Project",
-    projectKicker: "Activation-conditioned",
-    projectFlowLabel: "Safety-auditing workflow",
-    projectModelResponse: "Model response",
-    projectUnsafeSegments: "Unsafe segments",
-    projectSupportingRegions: "Supporting image regions",
-    projectDescription:
-      "An activation-conditioned framework for fine-grained multimodal safety auditing: detect unsafe response segments, then ground the image regions that support the risk.",
-    projectLink: "Repository",
-    projectResultsLabel: "Project results",
-    newDataset: "new dataset",
+    lifeHeading: "Life",
     opensInNewTab: " (opens in a new tab)",
   },
   zh: {
@@ -143,7 +136,7 @@ const siteCopy = {
       home: "首页",
       research: "研究",
       awards: "奖项",
-      project: "项目",
+      life: "生活",
     },
     role: "人工智能科学家",
     name: "何天成",
@@ -160,20 +153,12 @@ const siteCopy = {
     hust: "华中科技大学",
     masters: "硕士",
     profilesLabel: "学术主页",
+    contactLabel: "联系方式",
+    wechat: "微信",
     researchHeading: "研究",
     awardsHeading: "奖项",
     awardsListLabel: "按时间倒序排列的奖项",
-    projectHeading: "项目",
-    projectKicker: "激活状态驱动",
-    projectFlowLabel: "安全审计流程",
-    projectModelResponse: "模型回复",
-    projectUnsafeSegments: "不安全片段",
-    projectSupportingRegions: "风险支撑区域",
-    projectDescription:
-      "一个由激活状态驱动的细粒度多模态安全审计框架：先检测回复中的不安全片段，再定位支撑风险判断的图像区域。",
-    projectLink: "代码仓库",
-    projectResultsLabel: "项目结果",
-    newDataset: "新数据集",
+    lifeHeading: "生活",
     opensInNewTab: "（在新标签页中打开）",
   },
 } as const;
@@ -562,38 +547,56 @@ export default function Home() {
               </div>
             </div>
 
-            <nav className="hero-profiles" aria-label={copy.profilesLabel}>
-              <ExternalLink
-                className="profile-link profile-huggingface"
-                href="https://huggingface.co/htcwang"
-                language={language}
-              >
-                <img
-                  className="profile-logo profile-huggingface-logo"
-                  src="/brand/huggingface.svg"
-                  alt=""
-                  width="18"
-                  height="18"
-                  aria-hidden="true"
-                />
-                <span>Hugging Face</span>
-              </ExternalLink>
-              <ExternalLink
-                className="profile-link profile-github"
-                href="https://github.com/Tianchenggg"
-                language={language}
-              >
-                <img
-                  className="profile-logo profile-github-logo"
-                  src="/brand/github-mark.svg"
-                  alt=""
-                  width="17"
-                  height="17"
-                  aria-hidden="true"
-                />
-                <span>GitHub</span>
-              </ExternalLink>
-            </nav>
+            <div className="hero-connect">
+              <nav className="hero-profiles" aria-label={copy.profilesLabel}>
+                <ExternalLink
+                  className="profile-link profile-huggingface"
+                  href="https://huggingface.co/htcwang"
+                  language={language}
+                >
+                  <img
+                    className="profile-logo profile-huggingface-logo"
+                    src="/brand/huggingface.svg"
+                    alt=""
+                    width="18"
+                    height="18"
+                    aria-hidden="true"
+                  />
+                  <span>Hugging Face</span>
+                </ExternalLink>
+                <ExternalLink
+                  className="profile-link profile-github"
+                  href="https://github.com/Tianchenggg"
+                  language={language}
+                >
+                  <img
+                    className="profile-logo profile-github-logo"
+                    src="/brand/github-mark.svg"
+                    alt=""
+                    width="17"
+                    height="17"
+                    aria-hidden="true"
+                  />
+                  <span>GitHub</span>
+                </ExternalLink>
+              </nav>
+              <div className="contact-links" role="group" aria-label={copy.contactLabel}>
+                <a className="contact-email" href="mailto:tianchenghe77bupt@gmail.com">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" aria-hidden="true" focusable="false">
+                    <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="m4 7 8 6 8-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <span>tianchenghe77bupt@gmail.com</span>
+                </a>
+                <span className="contact-wechat">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" aria-hidden="true" focusable="false">
+                    <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-5.5a9 9 0 0 1-.9-4A8.5 8.5 0 0 1 12.5 3a8.5 8.5 0 0 1 8.5 8.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                    <path d="M9 11h.01M13 11h.01M17 11h.01" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" />
+                  </svg>
+                  <span>{copy.wechat}<span className="contact-separator" aria-hidden="true"> · </span><span className="contact-handle">Tancyne</span></span>
+                </span>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -692,89 +695,11 @@ export default function Home() {
           </ol>
         </section>
 
-        <section className="project-section section-pad" id="project">
+        <section className="life-section section-pad" id="life" aria-labelledby="life-heading">
           <div className="section-heading">
-            <h2>{copy.projectHeading}</h2>
+            <h2 id="life-heading">{copy.lifeHeading}</h2>
           </div>
-
-          <div className="project-panel">
-            <FluidBackdrop />
-            <div className="project-topline">
-              <div>
-                <span className="project-kicker">{copy.projectKicker}</span>
-                <h3>Activation Revelation</h3>
-              </div>
-              <ExternalLink
-                className="project-link project-repository"
-                href="https://github.com/Tianchenggg/Activation-Revelation"
-                language={language}
-                ariaLabel={`${copy.projectLink}${copy.opensInNewTab}`}
-              >
-                <img
-                  src="/brand/github-mark.svg"
-                  alt=""
-                  width="17"
-                  height="17"
-                  aria-hidden="true"
-                />
-                <span>{copy.projectLink}</span>
-              </ExternalLink>
-            </div>
-
-            <div className="project-main">
-              <div className="project-flow">
-                <div className="project-flow-heading">
-                  <span>{copy.projectFlowLabel}</span>
-                  <span aria-hidden="true">01—03</span>
-                </div>
-                <ol aria-label={copy.projectFlowLabel}>
-                  <li>
-                    <span aria-hidden="true">01</span>
-                    <span
-                      className="project-flow-visual is-response"
-                      aria-hidden="true"
-                    />
-                    <strong>{copy.projectModelResponse}</strong>
-                  </li>
-                  <li>
-                    <span aria-hidden="true">02</span>
-                    <span
-                      className="project-flow-visual is-segments"
-                      aria-hidden="true"
-                    />
-                    <strong>{copy.projectUnsafeSegments}</strong>
-                  </li>
-                  <li>
-                    <span aria-hidden="true">03</span>
-                    <span
-                      className="project-flow-visual is-regions"
-                      aria-hidden="true"
-                    />
-                    <strong>{copy.projectSupportingRegions}</strong>
-                  </li>
-                </ol>
-              </div>
-
-              <div className="project-copy">
-                <p>{copy.projectDescription}</p>
-              </div>
-            </div>
-
-            <dl className="metric-list" aria-label={copy.projectResultsLabel}>
-              <div>
-                <dt>Macro-F1</dt>
-                <dd>+7.2%</dd>
-              </div>
-              <div>
-                <dt>ACC@0.5</dt>
-                <dd>+26.9%</dd>
-              </div>
-              <div>
-                <dt>{copy.newDataset}</dt>
-                <dd>ARGUS</dd>
-              </div>
-            </dl>
-          </div>
+          <LifeGallery language={language} />
         </section>
       </main>
     </div>

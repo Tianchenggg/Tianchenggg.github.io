@@ -3,7 +3,7 @@ import test from "node:test";
 import { Window } from "happy-dom";
 import { attachSectionNavigation } from "../app/section-navigation.ts";
 
-const ids = ["home", "research", "awards", "project"];
+const ids = ["home", "research", "awards", "life"];
 
 /** Keep browser-owned motion explicit while exercising the real DOM listeners. */
 function setup(t, options = {}) {
@@ -209,7 +209,7 @@ test("rapid clicks replace navigation and ignore an earlier scrollend", t => {
   assert.equal(h.active, 1);
   assert.equal(h.timerCount, 0);
   assert.deepEqual(h.scrollCalls, [{ top: 2148, behavior: "smooth" }, { top: 508, behavior: "smooth" }]);
-  assert.deepEqual(h.historyCalls, ["#project", "#research"]);
+  assert.deepEqual(h.historyCalls, ["#life", "#research"]);
 });
 
 test("tapping the active anchor returns to its start without duplicating its hash", t => {
@@ -255,7 +255,7 @@ test("explicit short-section destinations survive shared bottom clamping until u
   h.advance(500);
   h.layoutChange();
   h.flushFrames();
-  assert.equal(h.active, 2, "awards must not snap to project at the shared target");
+  assert.equal(h.active, 2, "awards must not snap to life at the shared target");
   h.event("wheel");
   h.flushFrames();
   assert.equal(h.active, 3);
@@ -379,7 +379,7 @@ test("hash and history restoration select the restored section without starting 
   h.advance(500);
   assert.equal(h.active, 1);
   assert.equal(h.scrollCalls.length, 1, "restoration must not duplicate browser scrolling");
-  assert.deepEqual(h.historyCalls, ["#project"]);
+  assert.deepEqual(h.historyCalls, ["#life"]);
   h.restoreHash("#awards", 1908);
   assert.equal(h.active, 2);
   assert.equal(h.scrollCalls.length, 1);

@@ -87,12 +87,42 @@ test("color motion stays clipped and underneath stationary reading surfaces", ()
   assert.match(backdrop, /contain:\s*strict/);
   assert.match(backdrop, /pointer-events:\s*none/);
   assert.match(backdrop, /z-index:\s*0/);
-  for (const selector of [".publication-body", ".award-item time", ".award-icon", ".award-item h3", ".project-panel > *"]) {
+  for (const selector of [".publication-body", ".award-item time", ".award-icon", ".award-item h3"]) {
     assert.match(rulesFor(selector).join("\n"), /z-index:\s*1/, `${selector} must sit above the decorative color fields`);
   }
-  for (const selector of [".card-fluid::after", ".award-item .card-fluid::after", ".project-panel .card-fluid::after"]) {
+  for (const selector of [".card-fluid::after", ".award-item .card-fluid::after"]) {
     const rules = rulesFor(selector).join("\n");
     assert.match(rules, /background:\s*linear-gradient\(/, `${selector} must retain its stationary contrast veil`);
     assert.doesNotMatch(rules, /\banimation(?:-name)?\s*:/, "The reading surface must not animate with its background");
+  }
+});
+
+test("photographs retain their original framing and the viewer controls remain accessible", () => {
+  assert.match(rulesFor(".life-photo").join("\n"), /flex:\s*var\(--photo-ratio\)/,
+    "Desktop rows must size photographs from their original aspect ratios");
+  for (const selector of [".life-photo > img", ".life-lightbox-image"]) {
+    const rules = rulesFor(selector).join("\n");
+    assert.match(rules, /object-fit:\s*contain/);
+    assert.doesNotMatch(rules, /\b(?:animation|animation-name|filter|backdrop-filter)\s*:/,
+      "Photographs must not inherit the decorative fluid animation");
+  }
+  assert.match(rulesFor(".life-photo--landscape").join("\n"), /grid-column:\s*1\s*\/\s*-1/,
+    "Landscape framing must span the narrow-screen grid");
+  for (const selector of [".life-lightbox-close", ".life-lightbox-nav"]) {
+    const rules = rulesFor(selector).join("\n");
+    assert.match(rules, /width:\s*44px/);
+    assert.match(rules, /height:\s*44px/);
+    assert.match(rulesFor(`${selector}:focus-visible`).join("\n"), /outline:\s*2px\s+solid/);
+  }
+  assert.match(rulesFor(".life-lightbox").join("\n"), /height:\s*100dvh/);
+  assert.match(rulesFor(".life-lightbox-inner").join("\n"), /env\(safe-area-inset-top\)/);
+});
+
+test("poetic photograph titles remain visible without hover or motion", () => {
+  for (const selector of [".life-photo-caption", ".life-photo-title", ".life-lightbox-title"]) {
+    const rules = rulesFor(selector);
+    assert.ok(rules.length, `${selector} must have an intentional visible presentation`);
+    assert.doesNotMatch(rules.join("\n"), /(?:display:\s*none|visibility:\s*hidden|opacity:\s*0(?:\s*;|\s*$)|\b(?:animation|animation-name)\s*:)/,
+      "Titles must not require hovering or an animation to appear");
   }
 });

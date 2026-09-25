@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { access, readFile, stat } from "node:fs/promises";
 import test from "node:test";
+import { Window } from "happy-dom";
+import { lifePhotos } from "../app/life-photos.ts";
 
 function cssBlock(source, marker) {
   const markerIndex = source.indexOf(marker);
@@ -63,7 +65,7 @@ async function render() {
   );
 }
 
-test("server-renders the finished research portfolio", async () => {
+test("server-renders the finished research portfolio", async t => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
@@ -76,7 +78,7 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, />Home</);
   assert.match(html, />Research</);
   assert.match(html, />Awards</);
-  assert.match(html, />Project</);
+  assert.match(html, />Life</);
   assert.match(
     html,
     /class="language-toggle"[^>]*aria-label="Switch to Chinese"/,
@@ -87,9 +89,10 @@ test("server-renders the finished research portfolio", async () => {
   assert.equal(switcherMarkup.match(/>Home</g)?.length, 1);
   assert.equal(switcherMarkup.match(/>Research</g)?.length, 1);
   assert.equal(switcherMarkup.match(/>Awards</g)?.length, 1);
-  assert.equal(switcherMarkup.match(/>Project</g)?.length, 1);
+  assert.equal(switcherMarkup.match(/>Life</g)?.length, 1);
+  assert.doesNotMatch(switcherMarkup, />Project</);
   assert.equal(switcherMarkup.match(/<a\b/g)?.length, 4);
-  for (const id of ["home", "research", "awards", "project"]) {
+  for (const id of ["home", "research", "awards", "life"]) {
     assert.match(switcherMarkup, new RegExp(`<a\\b[^>]*href="#${id}"`));
   }
   assert.doesNotMatch(switcherMarkup, /section-switcher-drag-handle/);
@@ -105,13 +108,13 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(headerMarkup, /<button\b[^>]*class="spectrum-toggle"[^>]*aria-label="Pause background motion"/);
   assert.equal(html.match(/class="spectrum-toggle"/g)?.length, 1, "A single header control must pause all ambient motion");
   const ambientMarkup = [...html.matchAll(/<[^>]+\bdata-ambient(?:="[^"]*")?[^>]*>/g)].map(([element]) => element);
-  assert.equal(ambientMarkup.length, 11, "Hero, publications, awards, and project must share ambient-motion control");
+  assert.equal(ambientMarkup.length, 10, "Hero, publications, and awards must share ambient-motion control");
   for (const element of ambientMarkup) {
     assert.match(element, /data-running="false"/, "Ambient motion must wait for visibility before starting");
     assert.match(element, /aria-hidden="true"/, "Decorative motion must not enter the accessibility tree");
   }
   const fluidMarkup = [...html.matchAll(/<div class="card-fluid"[^>]*>[\s\S]*?<\/div>/g)].map(([element]) => element);
-  assert.equal(fluidMarkup.length, 10, "Each publication, award row, and project must have a shared fluid backdrop");
+  assert.equal(fluidMarkup.length, 9, "Each publication and award row must have a shared fluid backdrop");
   for (const backdrop of fluidMarkup) {
     for (const color of ["gold", "rose", "violet", "cyan"]) {
       assert.match(backdrop, new RegExp(`<span class="fluid-color is-${color}"></span>`));
@@ -122,11 +125,23 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, />AI Scientist</);
   assert.doesNotMatch(html, /AI Researcher/i);
   assert.match(html, /class="hero-info-rail"/);
+  const homeMarkup = html.match(/<section\b[^>]*id="home"[^>]*>[\s\S]*?<\/section>/)?.[0] ?? "";
+  const win = new Window();
+  t.after(() => win.happyDOM.close());
+  const homeDocument = new win.DOMParser().parseFromString(homeMarkup, "text/html");
+  const contacts = homeDocument.querySelector("#home .contact-links");
+  assert.ok(contacts, "Contact information must be inside Home");
+  const email = contacts.querySelector('a[href="mailto:tianchenghe77bupt@gmail.com"]');
+  assert.equal(email?.textContent.trim(), "tianchenghe77bupt@gmail.com");
+  const wechat = contacts.querySelector("span.contact-wechat");
+  assert.match(wechat?.textContent ?? "", /WeChat/);
+  assert.match(wechat?.textContent ?? "", /Tancyne/);
+  assert.equal(contacts.querySelectorAll("a").length, 1, "WeChat must be readable text, not an invented external link");
   assert.match(html, /Undergraduate/);
   assert.match(html, /Master(?:’|'|&#x27;)s/);
-  const affiliationsMarkup =
-    html.match(/<div class="hero-affiliations"[\s\S]*?<\/div><nav class="hero-profiles"/)?.[0] ?? "";
-  assert.ok(affiliationsMarkup.indexOf("BUPT") < affiliationsMarkup.indexOf("HUST"));
+  const affiliationNames = [...homeDocument.querySelectorAll("#home .hero-affiliations .affiliation-copy > strong")]
+    .map(element => element.textContent.trim());
+  assert.deepEqual(affiliationNames, ["BUPT", "HUST"], "Affiliations must retain their order independently of adjacent contact layout");
   assert.match(html, /\/brand\/huggingface\.svg/);
   assert.match(html, /\/brand\/github-mark\.svg/);
   assert.match(html, /\/brand\/hust-seal\.jpg/);
@@ -185,27 +200,27 @@ test("server-renders the finished research portfolio", async () => {
   assert.doesNotMatch(awardsMarkup, /class="award-mark"|>✦</);
   assert.ok(awardsMarkup.indexOf("2026") < awardsMarkup.indexOf("2025"));
   assert.ok(awardsMarkup.indexOf("2025") < awardsMarkup.indexOf("2024"));
-  assert.match(html, /Activation Revelation/);
-  assert.match(html, /<h2>Project<\/h2>/);
-  assert.match(html, /<h3>Activation Revelation<\/h3>/);
-  const projectMarkup =
-    html.match(/<section class="project-section section-pad"[\s\S]*?<\/section>/)?.[0] ?? "";
-  assert.match(projectMarkup, /class="project-topline"/);
-  assert.match(projectMarkup, /class="project-main"/);
-  assert.match(projectMarkup, /class="project-flow"/);
-  assert.match(
-    projectMarkup,
-    /<ol aria-label="Safety-auditing workflow">[\s\S]*Model response[\s\S]*Unsafe segments[\s\S]*Supporting image regions[\s\S]*<\/ol>/,
-  );
-  assert.match(
-    projectMarkup,
-    /<dl class="metric-list" aria-label="Project results">/,
-  );
-  assert.equal(projectMarkup.match(/<dt>/g)?.length, 3);
-  assert.equal(projectMarkup.match(/<dd>/g)?.length, 3);
-  assert.match(projectMarkup, /<dt>Macro-F1<\/dt><dd>\+7\.2%<\/dd>/);
-  assert.match(projectMarkup, /<dt>ACC@0\.5<\/dt><dd>\+26\.9%<\/dd>/);
-  assert.match(projectMarkup, /<dt>new dataset<\/dt><dd>ARGUS<\/dd>/);
+  const lifeMarkup =
+    html.match(/<section class="life-section section-pad"[\s\S]*?<\/section>/)?.[0] ?? "";
+  assert.match(lifeMarkup, /id="life"/);
+  assert.match(lifeMarkup, /aria-labelledby="life-heading"/);
+  assert.match(lifeMarkup, /<h2 id="life-heading">Life<\/h2>/);
+  assert.equal(lifeMarkup.match(/class="life-photo-caption"/g)?.length, 10);
+  assert.equal(lifeMarkup.match(/class="life-photo-title"/g)?.length, 10);
+  const lifeImages = [...lifeMarkup.matchAll(/<img\b[^>]*>/g)].map(([image]) => image);
+  assert.equal(lifeImages.length, 10, "All ten photographs must be available in the server-rendered gallery");
+  for (const image of lifeImages) {
+    assert.match(image, /src="\/life\/[^\"]+\.webp"/);
+    assert.match(image, /srcSet="[^\"]+-480\.webp 480w,\s*[^\"]+-960\.webp 960w(?:,|"|\s)/i);
+    assert.match(image, /loading="lazy"/);
+    assert.match(image, /decoding="async"/);
+    assert.match(image, /width="\d+"/);
+    assert.match(image, /height="\d+"/);
+    assert.match(image, /alt="[^\"]+"/);
+  }
+  assert.doesNotMatch(lifeMarkup, /card-fluid|data-ambient|<canvas\b|<video\b/);
+  assert.doesNotMatch(html, /Activation Revelation|id="project"|class="project-section/);
+  assert.match(papers.join(""), />Project</, "Publication project links must be retained");
   assert.match(html, /tiancheng-he-portrait-800\.webp/);
   assert.doesNotMatch(html, /RareAlert/);
   assert.doesNotMatch(html, /Two questions guide my work|Research should leave the lab/);
@@ -286,7 +301,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(cssBlock(css, "html {"), /scroll-padding-top:\s*var\(--section-offset\)/);
   assert.match(css, /--section-offset:\s*92px/);
   assert.match(css, /--section-offset:\s*72px/);
-  for (const id of ["home", "research", "awards", "project"]) {
+  for (const id of ["home", "research", "awards", "life"]) {
     assert.doesNotMatch(cssRulesForSelector(css, `#${id}`).join("\n"), /scroll-margin(?:-top|-block(?:-start)?)?\s*:/);
   }
 
@@ -297,15 +312,8 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(awardItemRule, /contain:\s*paint/);
   assert.doesNotMatch(awardItemRule, /backdrop-filter/);
 
-  const projectPanelRule =
-    [...css.matchAll(/\.project-panel\s*{([^}]*)}/gs)]
-      .map((match) => match[1])
-      .find((rule) => /contain:\s*paint/.test(rule)) ?? "";
-  assert.match(projectPanelRule, /contain:\s*paint/);
-  assert.doesNotMatch(projectPanelRule, /backdrop-filter/);
-  assert.match(css, /\.project-topline\s*{/);
-  assert.match(css, /\.project-flow\s*{/);
-  assert.match(css, /\.metric-list\s*{[^}]*display:\s*grid/s);
+  assert.match(css, /\.life-row\s*{/);
+  assert.doesNotMatch(css, /\.(?:project-panel|project-topline|project-main|project-flow|metric-list)\b/);
 
   assertCompositorOnlyKeyframes(css, "content-arrive");
   const arrivalFrames = cssBlock(css, "@keyframes content-arrive");
@@ -327,7 +335,7 @@ test("ships the GitHub Pages export and social assets", async () => {
     ".section-heading",
     ".publication-card",
     ".award-item",
-    ".project-panel",
+    ".life-row",
   ];
   for (const selector of animatedContentSelectors) {
     const declarations = cssRulesForSelector(viewTimelineRules, selector).join("\n");
@@ -335,7 +343,7 @@ test("ships the GitHub Pages export and social assets", async () => {
     assert.match(declarations, /animation-timeline:\s*view\(block\)/);
     assert.match(declarations, /animation-range:\s*entry 0% cover 22%/, `${selector} must finish its reveal before the reading area`);
   }
-  for (const selector of [".hero", ".project-topline", ".project-main", ".metric-list"]) {
+  for (const selector of [".hero", ".life-photo", ".life-photo > img", ".life-gallery"]) {
     assert.doesNotMatch(cssRulesForSelector(viewTimelineRules, selector).join("\n"), /animation(?:-name|-timeline)?\s*:/, `${selector} must not add a second content fade`);
   }
   assert.doesNotMatch(viewTimelineRules, /animation-range:[^;]*\bexit\b/);
@@ -344,7 +352,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   }
 
   const reducedMotionRules = cssBlock(css, "@media (prefers-reduced-motion: reduce)");
-  for (const selector of [".research .section-heading", ".awards-section .section-heading", ".project-section .section-heading", ...animatedContentSelectors.slice(1)]) {
+  for (const selector of [".research .section-heading", ".awards-section .section-heading", ".life-section .section-heading", ...animatedContentSelectors.slice(1)]) {
     const declarations = [
       ...cssRulesForSelector(reducedMotionRules, selector),
       ...(selector.endsWith(" .section-heading") ? cssRulesForSelector(reducedMotionRules, ".section-heading") : []),
@@ -364,7 +372,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(sectionSource, /id:\s*"home"/);
   assert.match(sectionSource, /id:\s*"research"/);
   assert.match(sectionSource, /id:\s*"awards"/);
-  assert.match(sectionSource, /id:\s*"project"/);
+  assert.match(sectionSource, /id:\s*"life"/);
   assert.equal(sectionSource.match(/id:\s*"/g)?.length, 4);
   assert.ok(
     sectionSource.indexOf('id: "home"') <
@@ -376,7 +384,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   );
   assert.ok(
     sectionSource.indexOf('id: "awards"') <
-      sectionSource.indexOf('id: "project"'),
+      sectionSource.indexOf('id: "life"'),
   );
   assert.doesNotMatch(switcher, /section-switcher-drag-handle/);
   assert.match(switcher, /labels\[section\.labelKey\]/);
@@ -404,9 +412,13 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(page, /document\.title\s*=\s*copy\.documentTitle/);
   assert.match(page, /onClick=\{\(\) => setLanguagePreference\(nextLanguage\)\}/);
   assert.match(page, /switchLanguage:\s*"切换为英文"/);
+  assert.match(page, /wechat:\s*"WeChat"/);
+  assert.match(page, /wechat:\s*"微信"/);
   assert.doesNotMatch(page, /aria-pressed/);
   assert.equal(page.match(/awards:\s*"Awards"/g)?.length, 1);
   assert.equal(page.match(/awards:\s*"奖项"/g)?.length, 1);
+  assert.equal(page.match(/life:\s*"Life"/g)?.length, 1);
+  assert.equal(page.match(/life:\s*"生活"/g)?.length, 1);
   assert.match(page, /awardsListLabel:\s*"Awards in reverse chronological order"/);
   assert.match(page, /awardsListLabel:\s*"按时间倒序排列的奖项"/);
   assert.match(page, /何天成/);
@@ -452,24 +464,13 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(page, /<ol className="award-list" aria-label=\{copy\.awardsListLabel\}>/);
   assert.match(page, /<li className="award-item" key=\{award\.year\}>/);
   assert.match(page, /<time dateTime=\{award\.year\}>\{award\.year\}<\/time>/);
-  const projectSource =
-    page.match(/<section className="project-section section-pad"[\s\S]*?<\/section>/)?.[0] ?? "";
-  assert.match(projectSource, /className="project-topline"/);
-  assert.match(projectSource, /className="project-main"/);
-  assert.match(projectSource, /className="project-flow"/);
-  assert.match(projectSource, /<ol aria-label=\{copy\.projectFlowLabel\}>/);
-  assert.match(projectSource, /copy\.projectModelResponse/);
-  assert.match(projectSource, /copy\.projectUnsafeSegments/);
-  assert.match(projectSource, /copy\.projectSupportingRegions/);
-  assert.match(
-    projectSource,
-    /<dl className="metric-list" aria-label=\{copy\.projectResultsLabel\}>/,
-  );
-  assert.equal(projectSource.match(/<dt>/g)?.length, 3);
-  assert.equal(projectSource.match(/<dd>/g)?.length, 3);
-  assert.match(page, /projectModelResponse:\s*"模型回复"/);
-  assert.match(page, /projectUnsafeSegments:\s*"不安全片段"/);
-  assert.match(page, /projectSupportingRegions:\s*"风险支撑区域"/);
+  const lifeSource =
+    page.match(/<section\b[^>]*className="life-section section-pad"[^>]*>[\s\S]*?<\/section>/)?.[0] ?? "";
+  assert.match(lifeSource, /id="life"/);
+  assert.match(lifeSource, /aria-labelledby="life-heading"/);
+  assert.match(lifeSource, /<h2 id="life-heading">\{copy\.lifeHeading\}<\/h2>/);
+  assert.match(lifeSource, /<LifeGallery language=\{language\}\s*\/>/);
+  assert.doesNotMatch(page, /projectFlowLabel|projectModelResponse|projectUnsafeSegments|projectSupportingRegions|projectResultsLabel/);
   assert.match(page, /opensInNewTab/);
   assert.match(page, /publication\.imageAlt\[language\]/);
   assert.doesNotMatch(page, /loading=\{index === 0/);
@@ -502,6 +503,11 @@ test("ships the GitHub Pages export and social assets", async () => {
     access(new URL("../out/brand/qmul-logo.svg", import.meta.url)),
     access(new URL("../out/brand/prc-national-emblem.png", import.meta.url)),
     access(new URL("../scripts/prepare-pages.mjs", import.meta.url)),
+    ...lifePhotos.flatMap(photo => ["out", "docs"].flatMap(directory =>
+      ["-480", "-960", ""].map(suffix =>
+        access(new URL(`../${directory}/life/${photo.id}${suffix}.webp`, import.meta.url)),
+      ),
+    )),
   ]);
 
   const optimizedImages = await Promise.all([

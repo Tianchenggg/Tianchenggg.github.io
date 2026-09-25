@@ -7,7 +7,7 @@ const sections = [
   { id: "home", labelKey: "home" },
   { id: "research", labelKey: "research" },
   { id: "awards", labelKey: "awards" },
-  { id: "project", labelKey: "project" },
+  { id: "life", labelKey: "life" },
 ] as const;
 
 type SectionLabels = Record<(typeof sections)[number]["labelKey"], string>;

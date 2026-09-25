@@ -41,7 +41,7 @@ function trackListeners(target, type) {
 async function setup(t, { reducedMotion = false, hidden = false, observerSupported = true } = {}) {
   const win = new Window({ url: "https://portfolio.test/" });
   const doc = win.document;
-  doc.body.innerHTML = `<div id="controls"></div>${Array.from({ length: 11 }, (_, index) =>
+  doc.body.innerHTML = `<div id="controls"></div>${Array.from({ length: 10 }, (_, index) =>
     `<div id="ambient-${index}" data-ambient="" data-running="false" aria-hidden="true"></div>`,
   ).join("")}`;
   const elements = [...doc.querySelectorAll("[data-ambient]")];
@@ -127,55 +127,55 @@ test("all shared ambient targets wait for visibility and stop immediately offscr
   const h = await setup(t);
   assert.deepEqual(h.running(), []);
   assert.equal(h.observers.length, 1, "A single observer must control every background");
-  assert.equal(h.observers[0].observed.size, 11);
+  assert.equal(h.observers[0].observed.size, 10);
   assert.equal(h.visibilityListeners.size, 1);
   assert.equal(h.motionListeners.size, 1);
 
-  h.intersect([0, 1, 7, 10]);
-  assert.deepEqual(h.running(), [0, 1, 7, 10]);
+  h.intersect([0, 1, 7, 9]);
+  assert.deepEqual(h.running(), [0, 1, 7, 9]);
   h.intersect([0, 7], false);
-  assert.deepEqual(h.running(), [1, 10]);
+  assert.deepEqual(h.running(), [1, 9]);
   h.intersect([4]);
-  assert.deepEqual(h.running(), [1, 4, 10]);
+  assert.deepEqual(h.running(), [1, 4, 9]);
 });
 
 test("tab visibility and reduced-motion changes gate every visible background", async t => {
   const h = await setup(t);
-  h.intersect([0, 4, 7, 10]);
+  h.intersect([0, 4, 7, 9]);
   h.setHidden(true);
   assert.deepEqual(h.running(), []);
   h.intersect([4], false);
   h.setHidden(false);
-  assert.deepEqual(h.running(), [0, 7, 10]);
+  assert.deepEqual(h.running(), [0, 7, 9]);
 
   h.setReducedMotion(true);
   assert.deepEqual(h.running(), []);
-  h.intersect([9]);
+  h.intersect([8]);
   h.setHidden(true);
   h.setReducedMotion(false);
   assert.deepEqual(h.running(), [], "Removing reduced motion must not resume a hidden tab");
   h.setHidden(false);
-  assert.deepEqual(h.running(), [0, 7, 9, 10]);
+  assert.deepEqual(h.running(), [0, 7, 8, 9]);
 });
 
 test("initial reduced motion and a hidden tab remain static after intersection", async t => {
   const h = await setup(t, { reducedMotion: true, hidden: true });
-  h.intersect([0, 1, 7, 10]);
+  h.intersect([0, 1, 7, 9]);
   assert.deepEqual(h.running(), []);
   h.setHidden(false);
   assert.deepEqual(h.running(), []);
   h.setReducedMotion(false);
-  assert.deepEqual(h.running(), [0, 1, 7, 10]);
+  assert.deepEqual(h.running(), [0, 1, 7, 9]);
 });
 
 test("the header pause control stops all surfaces and preserves pause through system changes", async t => {
   const h = await setup(t);
   assert.equal(h.button().getAttribute("aria-label"), "Pause background motion");
-  h.intersect([0, 2, 8, 10]);
+  h.intersect([0, 2, 8, 9]);
   await h.toggle();
   assert.deepEqual(h.running(), []);
   assert.equal(h.button().getAttribute("aria-label"), "Resume background motion");
-  h.intersect([0, 2, 8, 10]);
+  h.intersect([0, 2, 8, 9]);
   h.setHidden(true);
   h.setReducedMotion(true);
   h.setHidden(false);
@@ -183,8 +183,8 @@ test("the header pause control stops all surfaces and preserves pause through sy
   assert.deepEqual(h.running(), [], "Visibility or OS settings must not override user pause");
 
   await h.toggle();
-  h.intersect([0, 2, 8, 10]);
-  assert.deepEqual(h.running(), [0, 2, 8, 10]);
+  h.intersect([0, 2, 8, 9]);
+  assert.deepEqual(h.running(), [0, 2, 8, 9]);
   assert.equal(h.button().getAttribute("aria-label"), "Pause background motion");
   assert.equal(h.observers.filter(observer => !observer.disconnected).length, 1);
   assert.equal(h.visibilityListeners.size, 1, "Repeated toggles must not leak visibility listeners");
@@ -193,7 +193,7 @@ test("the header pause control stops all surfaces and preserves pause through sy
 
 test("unmount releases observers and listeners and leaves every background paused", async t => {
   const h = await setup(t);
-  h.intersect([0, 1, 7, 10]);
+  h.intersect([0, 1, 7, 9]);
   await h.dispose();
   assert.deepEqual(h.running(), []);
   assert.ok(h.observers.every(observer => observer.disconnected));
