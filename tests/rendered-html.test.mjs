@@ -103,9 +103,26 @@ test("server-renders the finished research portfolio", async () => {
   assert.match(html, /\/brand\/github-mark\.svg/);
   assert.match(html, /\/brand\/hust-seal\.jpg/);
   assert.match(html, /\/brand\/bupt-seal\.jpg/);
-  assert.match(html, /LLM safety/i);
+  assert.match(html, /LLM creativity/i);
   assert.doesNotMatch(html, /large-model safety/i);
-  assert.match(html, /agent creativity/i);
+  assert.match(html, /Post-training/);
+  assert.match(html, /Interpretability/);
+  assert.equal(html.match(/<article class="publication-card"/g)?.length, 6);
+  const papers = [...html.matchAll(/<article class="publication-card"[\s\S]*?<\/article>/g)].map(([card]) => card);
+  for (const [title, venue, paperId] of [
+    ["SaFeR-ToolKit", "AACL-IJCNLP 2026 Main", "UglumGIKbl"],
+    ["SaFeR-Steer", "EMNLP 2026 Main", "cxpvH46GvW"],
+    ["An Automated Pipeline", "EMNLP 2026 Findings", "ulUTEPCCNE"],
+    ["LatticeMind", "EMNLP 2026 Main", "eZ1kdXXe9x"],
+  ]) {
+    const card = papers.find((paper) => paper.includes(title));
+    assert.ok(card?.includes(venue), `${title} must show its accepted venue`);
+    assert.ok(card?.includes(`https://openreview.net/forum?id=${paperId}`));
+    assert.ok(!card?.includes("arXiv"), `${title} must not show a preprint venue`);
+  }
+  assert.match(papers[0], /SaFeR-ToolKit/);
+  assert.match(html, />IMWUT 2026</);
+  assert.doesNotMatch(html, /LiveSearchBench: An Automatically|PACM IMWUT/);
   assert.match(html, /RareLens: Towards End-to-End Rare Disease Care/);
   assert.match(html, /VCU-LLM: Prompt-efficient On-device Large Language Model/);
   assert.match(
@@ -411,7 +428,11 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(page, /VCU-LLM：面向智能家居模糊指令理解/);
   assert.match(page, /SaFeR-Steer：基于合成自举与反馈动力学/);
   assert.match(page, /SaFeR-ToolKit：借助虚拟工具调用/);
-  assert.match(page, /LiveSearchBench：面向动态知识检索与推理/);
+  assert.match(page, /面向动态知识的可证明检索依赖型基准自动构建流程/);
+  assert.match(page, /LatticeMind：面向多智能体系统的冲突感知记忆原语/);
+  assert.match(page, /大模型创造力/);
+  assert.match(page, /后训练/);
+  assert.match(page, /可解释性/);
   const awardsSource =
     page.match(/const awards: Award\[\] = \[[\s\S]*?\n\];/)?.[0] ?? "";
   assert.match(
@@ -483,6 +504,7 @@ test("ships the GitHub Pages export and social assets", async () => {
     access(new URL("../out/images/paper-safer-steer-1000.webp", import.meta.url)),
     access(new URL("../out/images/paper-safer-toolkit-1000.webp", import.meta.url)),
     access(new URL("../out/images/paper-livesearchbench-1000.webp", import.meta.url)),
+    access(new URL("../out/images/paper-latticemind-1000.webp", import.meta.url)),
     access(new URL("../out/brand/huggingface.svg", import.meta.url)),
     access(new URL("../out/brand/github-mark.svg", import.meta.url)),
     access(new URL("../out/brand/hust-seal.jpg", import.meta.url)),
@@ -499,7 +521,8 @@ test("ships the GitHub Pages export and social assets", async () => {
     stat(new URL("../out/images/paper-safer-steer-1000.webp", import.meta.url)),
     stat(new URL("../out/images/paper-safer-toolkit-1000.webp", import.meta.url)),
     stat(new URL("../out/images/paper-livesearchbench-1000.webp", import.meta.url)),
+    stat(new URL("../out/images/paper-latticemind-1000.webp", import.meta.url)),
   ]);
   const optimizedImageBytes = optimizedImages.reduce((total, image) => total + image.size, 0);
-  assert.ok(optimizedImageBytes < 450_000, `Optimized images total ${optimizedImageBytes} bytes`);
+  assert.ok(optimizedImageBytes < 550_000, `Optimized images total ${optimizedImageBytes} bytes`);
 });

@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import SectionSwitcher from "./section-switcher";
+import HeroSpectrum from "./hero-spectrum";
 
 type Language = "en" | "zh";
 type LocalizedText = Record<Language, string>;
@@ -105,8 +106,10 @@ const siteCopy = {
     statement:
       "Research should solve real-world problems and improve people’s lives.",
     focusLabel: "Research focus",
-    safety: "LLM safety",
-    creativity: "Agent creativity",
+    creativity: "LLM creativity",
+    postTraining: "Post-training",
+    interpretability: "Interpretability",
+    motion: { pause: "Pause background motion", resume: "Resume background motion" },
     portraitAlt: "Portrait of Tiancheng He",
     affiliationsLabel: "Affiliations",
     bupt: "BUPT",
@@ -145,8 +148,10 @@ const siteCopy = {
     name: "何天成",
     statement: "研究应解决现实问题，改善人们的生活。",
     focusLabel: "研究方向",
-    safety: "大语言模型安全",
-    creativity: "智能体创造力",
+    creativity: "大模型创造力",
+    postTraining: "后训练",
+    interpretability: "可解释性",
+    motion: { pause: "暂停背景动效", resume: "继续背景动效" },
     portraitAlt: "何天成的肖像",
     affiliationsLabel: "教育经历",
     bupt: "北京邮电大学",
@@ -206,7 +211,7 @@ const publications: Publication[] = [
   {
     date: { en: "Jun 2026", zh: "2026年6月" },
     dateTime: "2026-06",
-    venue: "PACM IMWUT · 10(2)",
+    venue: "IMWUT 2026",
     title: {
       en: "VCU-LLM: Prompt-efficient On-device Large Language Model for Vague Command Understanding in Smart Homes",
       zh: "VCU-LLM：面向智能家居模糊指令理解的提示高效型端侧大语言模型",
@@ -235,9 +240,9 @@ const publications: Publication[] = [
     imageHeight: 483,
   },
   {
-    date: { en: "May 2026", zh: "2026年5月" },
-    dateTime: "2026-05",
-    venue: "arXiv · cs.LG / cs.CL",
+    date: { en: "Aug 2026", zh: "2026年8月" },
+    dateTime: "2026-08-21",
+    venue: "EMNLP 2026 Main",
     title: {
       en: "SaFeR-Steer: Evolving Multi-Turn MLLMs via Synthetic Bootstrapping and Feedback Dynamics",
       zh: "SaFeR-Steer：基于合成自举与反馈动力学演化多轮多模态大语言模型",
@@ -251,8 +256,8 @@ const publications: Publication[] = [
       zh: "结合分阶段合成自举、导师在环 GRPO 与轨迹感知奖励，提升模型对持续升级的多模态攻击的防御能力。",
     },
     links: [
-      { label: { en: "Paper", zh: "论文" }, href: "https://arxiv.org/abs/2604.16358" },
-      { label: { en: "Code", zh: "代码" }, href: "https://github.com/Ed-Bg/SaFeR-Steer" },
+      { label: { en: "Paper", zh: "论文" }, href: "https://openreview.net/forum?id=cxpvH46GvW" },
+      { label: { en: "Code", zh: "代码" }, href: "https://github.com/Ed-Bg/SaFeR-Steer-full" },
     ],
     image: "/images/paper-safer-steer-1000.webp",
     imageAlt: {
@@ -263,9 +268,9 @@ const publications: Publication[] = [
     imageHeight: 341,
   },
   {
-    date: { en: "Mar 2026", zh: "2026年3月" },
-    dateTime: "2026-03",
-    venue: "arXiv · cs.LG",
+    date: { en: "Sep 2026", zh: "2026年9月" },
+    dateTime: "2026-09-08",
+    venue: "AACL-IJCNLP 2026 Main",
     title: {
       en: "SaFeR-ToolKit: Structured Reasoning via Virtual Tool Calling for Multimodal Safety",
       zh: "SaFeR-ToolKit：借助虚拟工具调用实现面向多模态安全的结构化推理",
@@ -279,7 +284,7 @@ const publications: Publication[] = [
       zh: "将多模态安全推理转化为具有类型约束、可审计的“感知 → 推理 → 决策”工具轨迹，并通过 SFT、DPO 与 GRPO 进行训练。",
     },
     links: [
-      { label: { en: "Paper", zh: "论文" }, href: "https://arxiv.org/abs/2603.02635" },
+      { label: { en: "Paper", zh: "论文" }, href: "https://openreview.net/forum?id=UglumGIKbl" },
       { label: { en: "Code", zh: "代码" }, href: "https://github.com/Duebassx/SaFeR_ToolKit" },
     ],
     image: "/images/paper-safer-toolkit-1000.webp",
@@ -291,23 +296,23 @@ const publications: Publication[] = [
     imageHeight: 407,
   },
   {
-    date: { en: "Nov 2025", zh: "2025年11月" },
-    dateTime: "2025-11",
-    venue: "arXiv · cs.CL",
+    date: { en: "Aug 2026", zh: "2026年8月" },
+    dateTime: "2026-08-21",
+    venue: "EMNLP 2026 Findings",
     title: {
-      en: "LiveSearchBench: An Automatically Constructed Benchmark for Retrieval and Reasoning over Dynamic Knowledge",
-      zh: "LiveSearchBench：面向动态知识检索与推理的自动构建基准",
+      en: "An Automated Pipeline for Provably Retrieval-Dependent Benchmark Construction over Dynamic Knowledge",
+      zh: "面向动态知识的可证明检索依赖型基准自动构建流程",
     },
     authors: {
-      en: "Heng Zhou*, Ao Yu*, Yuchen Fan*, Jianing Shi, Li Kang, Hejia Geng, Yongting Zhang, Yutao Fan, Yuhao Wu, Tiancheng He, Yiran Qin, Lei Bai, Zhenfei Yin",
-      zh: "Heng Zhou*、Ao Yu*、Yuchen Fan*、Jianing Shi、Li Kang、Hejia Geng、Yongting Zhang、Yutao Fan、Yuhao Wu、何天成、Yiran Qin、Lei Bai、Zhenfei Yin",
+      en: "Heng Zhou, Ao Yu, Yuchen Fan, Li Kang, Jianing Shi, Yongting Zhang, Yutao Fan, Tiancheng He, Yibing Lin, Hejia Geng, Yuhao Wu, Xiufeng Song, Zhemeng Zhang, Songtao Huang, Yiran Qin, Wenlong Zhang, Lei Bai, Zhenfei Yin",
+      zh: "Heng Zhou、Ao Yu、Yuchen Fan、Li Kang、Jianing Shi、Yongting Zhang、Yutao Fan、何天成、Yibing Lin、Hejia Geng、Yuhao Wu、Xiufeng Song、Zhemeng Zhang、Songtao Huang、Yiran Qin、Wenlong Zhang、Lei Bai、Zhenfei Yin",
     },
     summary: {
-      en: "Continuously builds temporally grounded, SPARQL-verified questions from Wikidata changes to test retrieval over post-training facts.",
-      zh: "基于 Wikidata 的持续变化，自动构建具备时间依据且经 SPARQL 验证的问题，用于评测模型对训练后新事实的检索能力。",
+      en: "LiveSearchBench builds retrieval-dependent questions from Wikidata snapshot changes, combining topology-aware synthesis with SPARQL-verified unique answers.",
+      zh: "LiveSearchBench 基于 Wikidata 快照差异构建依赖检索的问题，结合拓扑感知生成与 SPARQL 验证，确保答案唯一。",
     },
     links: [
-      { label: { en: "Paper", zh: "论文" }, href: "https://arxiv.org/abs/2511.01409" },
+      { label: { en: "Paper", zh: "论文" }, href: "https://openreview.net/forum?id=ulUTEPCCNE" },
       { label: { en: "Project", zh: "项目主页" }, href: "https://livesearchbench.github.io/" },
       { label: { en: "Code", zh: "代码" }, href: "https://github.com/hengzzzhou/LiveSearchbench" },
     ],
@@ -319,7 +324,38 @@ const publications: Publication[] = [
     imageWidth: 1000,
     imageHeight: 534,
   },
+  {
+    date: { en: "Aug 2026", zh: "2026年8月" },
+    dateTime: "2026-08-21",
+    venue: "EMNLP 2026 Main",
+    title: {
+      en: "LatticeMind: A Conflict-Aware Memory Primitive for Multi-Agent Systems",
+      zh: "LatticeMind：面向多智能体系统的冲突感知记忆原语",
+    },
+    authors: {
+      en: "Heng Zhou*, Lian Zhang*, Yutao Fan*, Tiancheng He, Siki Chen, Hejia Geng, Philip Torr, Zhenfei Yin",
+      zh: "Heng Zhou*、Lian Zhang*、Yutao Fan*、何天成、Siki Chen、Hejia Geng、Philip Torr、Zhenfei Yin",
+    },
+    summary: {
+      en: "Resolves contradictions when agents write to shared memory, combining explicit claim states, symbolic conflict checks, and selective LLM reconciliation.",
+      zh: "在多智能体共享记忆的写入阶段处理矛盾，通过显式状态、符号冲突检查与选择性大模型协调，维护可追溯的当前记忆。",
+    },
+    links: [
+      { label: { en: "Paper", zh: "论文" }, href: "https://openreview.net/forum?id=eZ1kdXXe9x" },
+    ],
+    image: "/images/paper-latticemind-1000.webp",
+    imageAlt: {
+      en: "LatticeMind Figure 1: structured writes, conflict resolution, and shared memory",
+      zh: "LatticeMind 论文图 1：结构化写入、冲突消解与共享记忆框架",
+    },
+    imageWidth: 1000,
+    imageHeight: 667,
+  },
 ];
+
+const orderedPublications = [...publications].sort((a, b) =>
+  b.dateTime.localeCompare(a.dateTime),
+);
 
 const awards: Award[] = [
   {
@@ -392,14 +428,16 @@ function ExternalLink({
   children,
   language,
   className = "",
+  ariaLabel,
 }: {
   href: string;
   children: ReactNode;
   language: Language;
   className?: string;
+  ariaLabel?: string;
 }) {
   return (
-    <a className={className} href={href} target="_blank" rel="noreferrer">
+    <a className={className} href={href} target="_blank" rel="noreferrer" aria-label={ariaLabel}>
       <span className="link-label">{children}</span>
       <span className="link-arrow" aria-hidden="true">
         ↗
@@ -459,6 +497,7 @@ export default function Home() {
 
       <main className="portfolio-shell" id="content">
         <section className="hero section-pad" id="home">
+          <HeroSpectrum labels={copy.motion} />
           <div className="hero-copy">
             <p className="hero-eyebrow">{copy.role}</p>
             <h1>
@@ -474,9 +513,9 @@ export default function Home() {
             <div className="hero-focus-block">
               <span className="hero-focus-label">{copy.focusLabel}</span>
               <p className="hero-focus-values">
-                <strong>{copy.safety}</strong>
-                <span aria-hidden="true">/</span>
                 <strong>{copy.creativity}</strong>
+                <strong>{copy.postTraining}</strong>
+                <strong>{copy.interpretability}</strong>
               </p>
             </div>
           </div>
@@ -563,11 +602,15 @@ export default function Home() {
           </div>
 
           <div className="publication-grid">
-            {publications.map((publication) => {
+            {orderedPublications.map((publication) => {
               const publicationTitle = publication.title[language];
 
               return (
-                <article className="publication-card" key={publication.title.en}>
+                <article
+                  className="publication-card"
+                  data-venue={publication.venue.split(" ")[0]}
+                  key={publication.title.en}
+                >
                   <figure className="publication-visual">
                     <img
                       src={publication.image}
@@ -661,6 +704,7 @@ export default function Home() {
                 className="project-link project-repository"
                 href="https://github.com/Tianchenggg/Activation-Revelation"
                 language={language}
+                ariaLabel={`${copy.projectLink}${copy.opensInNewTab}`}
               >
                 <img
                   src="/brand/github-mark.svg"
