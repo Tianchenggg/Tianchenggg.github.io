@@ -605,11 +605,11 @@ img {
   position: relative;
   z-index: 3;
   grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 16px 2px 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(260px, 1.35fr);
+  align-items: start;
+  gap: 20px;
+  padding: 12px 0 0;
   border-top: 1px solid rgb(24 54 84 / 0.12);
 }
 
@@ -623,70 +623,65 @@ img {
   content: "";
 }
 
-.hero-affiliations {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 22px;
+.hero-affiliations,
+.hero-profiles,
+.contact-links {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
 }
 
 .affiliation-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  min-height: 44px;
+  min-width: 0;
+  gap: 10px;
 }
 
-.affiliation-item > img {
-  width: 28px;
-  height: 28px;
-  flex: 0 0 auto;
-  border: 1px solid rgb(26 64 104 / 0.14);
+.identity-icon {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  place-items: center;
   border-radius: 50%;
-  object-fit: cover;
-  background: #fff;
-  box-shadow: 0 2px 6px rgb(26 54 86 / 0.09);
+  overflow: hidden;
 }
+
+.identity-icon--school {
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(26 64 104 / 0.12), 0 2px 6px rgb(26 54 86 / 0.07);
+}
+
+.identity-icon--school img { display: block; width: 32px; height: 32px; object-fit: cover; }
+.identity-icon--huggingface { background: #fff1bc; }
+.identity-icon--github { background: #e8e5f8; }
 
 .affiliation-copy {
   display: grid;
+  min-width: 0;
   gap: 1px;
 }
 
 .affiliation-copy strong {
   color: var(--ink-strong);
-  font-size: 0.73rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
 }
 
 .affiliation-copy small {
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   line-height: 1.2;
 }
 
-.hero-profiles {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 20px;
-}
-
-.hero-connect {
-  display: grid;
-  justify-items: end;
-  min-width: 0;
-  gap: 6px;
-}
-
 .contact-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 4px 20px;
   color: #536175;
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   line-height: 1.5;
 }
 
@@ -694,8 +689,9 @@ img {
 .contact-wechat {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  min-height: 40px;
+  gap: 10px;
+  min-height: 44px;
+  min-width: 0;
 }
 
 .contact-icon {
@@ -718,7 +714,7 @@ img {
 .contact-email { color: inherit; text-underline-offset: 4px; }
 .contact-email:hover { color: #314c89; text-decoration: underline; }
 .contact-links svg { flex-shrink: 0; }
-.contact-email > span { overflow-wrap: anywhere; }
+.contact-text { min-width: 0; overflow-wrap: anywhere; }
 .contact-separator { color: #9aabba; }
 .contact-handle { color: var(--ink); user-select: all; }
 
@@ -726,10 +722,12 @@ img {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 4px 0;
+  gap: 5px;
+  min-height: 44px;
+  justify-self: start;
+  padding: 0;
   color: var(--ink);
-  font-size: 0.74rem;
+  font-size: 0.8rem;
   font-weight: 650;
   white-space: nowrap;
 }
@@ -737,7 +735,7 @@ img {
 .profile-link .link-label {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 10px;
 }
 
 .profile-link::after {
@@ -775,13 +773,13 @@ img {
 }
 
 .profile-huggingface-logo {
-  width: 18px;
-  height: 18px;
+  width: 32px;
+  height: 32px;
 }
 
 .profile-github-logo {
-  width: 17px;
-  height: 17px;
+  width: 23px;
+  height: 23px;
   opacity: 0.88;
 }
 
@@ -1614,26 +1612,14 @@ a:focus-visible .link-arrow {
 
   .hero-info-rail {
     grid-column: auto;
-    align-items: stretch;
-    flex-direction: column;
-    gap: 14px;
-    padding-top: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 16px;
+    padding-top: 12px;
   }
 
-  .hero-affiliations {
-    gap: 18px;
-  }
-
-  .hero-profiles {
-    gap: 18px;
-  }
-
-  .hero-connect { justify-items: start; gap: 4px; }
-  .contact-links { justify-content: flex-start; gap: 2px 18px; }
-
-  .profile-link {
-    font-size: 0.7rem;
-  }
+  .contact-links { grid-column: 1 / -1; }
+  .profile-link .link-label { gap: 8px; }
+  .profile-link .link-arrow { display: none; }
 
   .hero-portrait {
     justify-self: end;
@@ -1760,19 +1746,6 @@ a:focus-visible .link-arrow {
 @media (max-width: 430px) {
   .hero h1 {
     font-size: clamp(2.85rem, 13vw, 3.25rem);
-  }
-
-  .hero-affiliations {
-    gap: 14px;
-  }
-
-  .affiliation-item {
-    gap: 6px;
-  }
-
-  .affiliation-item > img {
-    width: 25px;
-    height: 25px;
   }
 
   .publication-meta {

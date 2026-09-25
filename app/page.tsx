@@ -523,28 +523,20 @@ export default function Home() {
           </figure>
 
           <div className="hero-info-rail">
-            <div className="hero-affiliations" aria-label={copy.affiliationsLabel}>
+            <div className="hero-affiliations" role="group" aria-label={copy.affiliationsLabel}>
               <div className="affiliation-item">
-                <img
-                  src="/brand/bupt-seal.jpg"
-                  alt=""
-                  width="28"
-                  height="28"
-                  aria-hidden="true"
-                />
+                <span className="identity-icon identity-icon--school" aria-hidden="true">
+                  <img src="/brand/bupt-seal.jpg" alt="" width="32" height="32" />
+                </span>
                 <span className="affiliation-copy">
                   <strong>{copy.bupt}</strong>
                   <small>{copy.undergraduate}</small>
                 </span>
               </div>
               <div className="affiliation-item">
-                <img
-                  src="/brand/hust-seal.jpg"
-                  alt=""
-                  width="28"
-                  height="28"
-                  aria-hidden="true"
-                />
+                <span className="identity-icon identity-icon--school" aria-hidden="true">
+                  <img src="/brand/hust-seal.jpg" alt="" width="32" height="32" />
+                </span>
                 <span className="affiliation-copy">
                   <strong>{copy.hust}</strong>
                   <small>{copy.masters}</small>
@@ -552,56 +544,57 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="hero-connect">
-              <nav className="hero-profiles" aria-label={copy.profilesLabel}>
-                <ExternalLink
-                  className="profile-link profile-huggingface"
-                  href="https://huggingface.co/htcwang"
-                  language={language}
-                >
+            <nav className="hero-profiles" aria-label={copy.profilesLabel}>
+              <ExternalLink
+                className="profile-link profile-huggingface"
+                href="https://huggingface.co/htcwang"
+                language={language}
+              >
+                <span className="identity-icon identity-icon--huggingface" aria-hidden="true">
                   <img
                     className="profile-logo profile-huggingface-logo"
                     src="/brand/huggingface.svg"
                     alt=""
-                    width="18"
-                    height="18"
-                    aria-hidden="true"
+                    width="32"
+                    height="32"
                   />
-                  <span>Hugging Face</span>
-                </ExternalLink>
-                <ExternalLink
-                  className="profile-link profile-github"
-                  href="https://github.com/Tianchenggg"
-                  language={language}
-                >
+                </span>
+                <span>Hugging Face</span>
+              </ExternalLink>
+              <ExternalLink
+                className="profile-link profile-github"
+                href="https://github.com/Tianchenggg"
+                language={language}
+              >
+                <span className="identity-icon identity-icon--github" aria-hidden="true">
                   <img
                     className="profile-logo profile-github-logo"
                     src="/brand/github-mark.svg"
                     alt=""
-                    width="17"
-                    height="17"
-                    aria-hidden="true"
+                    width="23"
+                    height="23"
                   />
-                  <span>GitHub</span>
-                </ExternalLink>
-              </nav>
-              <div className="contact-links" role="group" aria-label={copy.contactLabel}>
-                <a className="contact-email" href="mailto:tianchenghe77bupt@gmail.com">
-                  <span className="contact-icon contact-icon--email" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" focusable="false">
-                      <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" strokeWidth="1.7" />
-                      <path d="m4 7 8 6 8-6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
-                  <span>tianchenghe77bupt@gmail.com</span>
-                </a>
-                <span className="contact-wechat">
-                  <span className="contact-icon contact-icon--wechat" aria-hidden="true">
-                    <img src="/brand/wechat.svg" width="20" height="20" alt="" />
-                  </span>
-                  <span>{copy.wechat}<span className="contact-separator" aria-hidden="true"> · </span><span className="contact-handle">Tancyne</span></span>
                 </span>
-              </div>
+                <span>GitHub</span>
+              </ExternalLink>
+            </nav>
+
+            <div className="contact-links" role="group" aria-label={copy.contactLabel}>
+              <a className="contact-email" href="mailto:tianchenghe77bupt@gmail.com">
+                <span className="identity-icon contact-icon contact-icon--email" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" focusable="false">
+                    <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" strokeWidth="1.7" />
+                    <path d="m4 7 8 6 8-6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <span className="contact-text">tianchenghe77bupt@gmail.com</span>
+              </a>
+              <span className="contact-wechat">
+                <span className="identity-icon contact-icon contact-icon--wechat" aria-hidden="true">
+                  <img src="/brand/wechat.svg" width="20" height="20" alt="" />
+                </span>
+                <span className="contact-text">{copy.wechat}<span className="contact-separator" aria-hidden="true"> · </span><span className="contact-handle">Tancyne</span></span>
+              </span>
             </div>
           </div>
         </section>

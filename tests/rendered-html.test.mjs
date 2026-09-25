@@ -133,6 +133,11 @@ test("server-renders the finished research portfolio", async t => {
   assert.equal(creativity.querySelector("span:not(.creativity-spectrum)")?.textContent.trim(), "Agent");
   const contacts = homeDocument.querySelector("#home .contact-links");
   assert.ok(contacts, "Contact information must be inside Home");
+  const rail = homeDocument.querySelector("#home .hero-info-rail");
+  assert.deepEqual([...rail.children].map(element => element.className), ["hero-affiliations", "hero-profiles", "contact-links"]);
+  const identityIcons = [...rail.querySelectorAll(".identity-icon")];
+  assert.equal(identityIcons.length, 6, "Both schools, both profiles, and both contact methods need the shared icon geometry");
+  assert.ok(identityIcons.every(icon => icon.getAttribute("aria-hidden") === "true"));
   const email = contacts.querySelector('a[href="mailto:tianchenghe77bupt@gmail.com"]');
   assert.equal(email?.textContent.trim(), "tianchenghe77bupt@gmail.com");
   const wechat = contacts.querySelector("span.contact-wechat");
@@ -273,8 +278,8 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /\.language-toggle\s*{[^}]*min-height:/s);
   assert.match(css, /\.language-option\.is-active\s*{/);
   assert.match(css, /\.hero-info-rail\s*{/);
-  assert.match(css, /\.hero-affiliations\s*{/);
-  assert.match(css, /\.hero-profiles\s*{/);
+  assert.match(cssRulesForSelector(css, ".hero-affiliations").join("\n"), /display:\s*grid/);
+  assert.match(cssRulesForSelector(css, ".hero-profiles").join("\n"), /display:\s*grid/);
   assert.match(css, /\.profile-link\s*{/);
   assert.match(css, /\.award-icon\.is-qmul\s*{/);
   assert.match(css, /\.award-icon\.is-bupt img\s*{/);

@@ -273,3 +273,24 @@ test("contact icons share circular geometry and distinct email and WeChat colors
   });
   assert.notEqual(backgrounds[0], backgrounds[1], "Email and WeChat should be distinguishable at a glance");
 });
+
+test("all six identity icons share a fixed size and the rail groups content without truncating contacts", () => {
+  const icon = rulesFor(".identity-icon").join("\n");
+  assert.match(icon, /width:\s*32px/);
+  assert.match(icon, /height:\s*32px/);
+  assert.match(icon, /flex-shrink:\s*0/);
+  assert.match(icon, /border-radius:\s*50%/);
+  assert.doesNotMatch(css, /\.affiliation-item\s*>\s*img\s*\{/,
+    "Old phone overrides must not shrink only the school icons");
+  assert.match(rulesFor(".hero-info-rail")[0], /display:\s*grid/);
+  assert.match(rulesFor(".hero-info-rail")[0], /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(0,\s*1fr\)\s+minmax\(260px,\s*1\.35fr\)/);
+  for (const selector of [".affiliation-item", ".profile-link", ".contact-email", ".contact-wechat"]) {
+    assert.match(rulesFor(selector).join("\n"), /min-height:\s*44px/);
+  }
+  const narrow = [...css.matchAll(/@media\s*\(max-width:\s*700px\)/g)]
+    .map(match => blockAt(match[0], match.index).body).join("\n");
+  assert.match(rulesFor(".hero-info-rail", narrow).join("\n"), /grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(rulesFor(".contact-links", narrow).join("\n"), /grid-column:\s*1\s*\/\s*-1/);
+  assert.match(rulesFor(".contact-text").join("\n"), /overflow-wrap:\s*anywhere/);
+  assert.doesNotMatch(rulesFor(".contact-text").join("\n"), /text-overflow:\s*ellipsis|white-space:\s*nowrap/);
+});

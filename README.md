@@ -27,7 +27,7 @@ Home highlights **Agent Creativity / 智能体创造力**, with a static, high-c
 
 Life replaces the former Project section with ten user-supplied photographs. Desktop rows balance landscape and portrait compositions without cropping; mobile uses a two-column gallery with full-width landscapes. Each photograph has a short bilingual poetic title, without inferred locations or dates. A keyboard-accessible native dialog displays the full-size photographs. Grid images have responsive WebP sources and lazy loading; the lightbox image mounts only when opened. Web derivatives strip EXIF/GPS metadata and leave the uploaded originals untouched. Regenerate them with `node scripts/prepare-life-photos.mjs <upload-directory>`.
 
-Home groups the author's email and WeChat handle alongside the research profile links. Email uses a standard `mailto:` link; the WeChat handle remains selectable text without an invented profile URL.
+Home uses three aligned two-row groups for education, research profiles, and contact details. All six marks share a 32px circular icon slot and 44px minimum row height, with optical sizing for each logo. On phones, education and profiles sit side by side above full-width contact rows. The full email remains visible and uses a standard `mailto:` link; the WeChat handle remains selectable text without an invented profile URL.
 
 Contact icons use matching circular blue and green badges. The WeChat dual-bubble mark is sourced from [Simple Icons](https://github.com/simple-icons/simple-icons/blob/develop/icons/wechat.svg) and stored locally; the envelope is an inline SVG.
 
