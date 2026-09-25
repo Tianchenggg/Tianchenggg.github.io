@@ -29,6 +29,8 @@ Life replaces the former Project section with ten user-supplied photographs. Des
 
 Home groups the author's email and WeChat handle alongside the research profile links. Email uses a standard `mailto:` link; the WeChat handle remains selectable text without an invented profile URL.
 
+Contact icons use matching circular blue and green badges. The WeChat dual-bubble mark is sourced from [Simple Icons](https://github.com/simple-icons/simple-icons/blob/develop/icons/wechat.svg) and stored locally; the envelope is an inline SVG.
+
 Navigation uses native scrolling with a single header offset. Manual scroll input cancels an in-flight jump; explicit short-section destinations remain selected even when their anchors share the document's bottom limit. Real links handle clicks and keyboard activation, and horizontal dragging has a threshold and cancellation handling.
 
 `npm test` builds both targets and runs rendered-output, scroll geometry, and DOM interaction regression tests. The DOM tests use controlled layout and time; they complement, rather than replace, visual/device testing.

@@ -175,3 +175,23 @@ test("poetic photograph titles remain visible without hover or motion", () => {
       "Titles must not require hovering or an animation to appear");
   }
 });
+
+test("contact icons share circular geometry and distinct email and WeChat colors", () => {
+  const icon = rulesFor(".contact-icon").join("\n");
+  assert.match(icon, /width:\s*32px\s*;/);
+  assert.match(icon, /height:\s*32px\s*;/);
+  assert.match(icon, /border-radius:\s*50%\s*;/);
+  assert.match(icon, /flex-shrink:\s*0\s*;/, "Narrow layouts must not squash the circular icons");
+  assert.doesNotMatch(icon, /\b(?:animation|animation-name|filter|backdrop-filter)\s*:/,
+    "Contact symbols must remain sharp and stationary over the ambient background");
+
+  const backgrounds = ["email", "wechat"].map(channel => {
+    const rules = rulesFor(`.contact-icon--${channel}`).join("\n");
+    const background = rules.match(/background(?:-color)?:\s*([^;]+);/)?.[1];
+    assert.ok(background, `${channel} needs its own colored circular backing`);
+    assert.doesNotMatch(rules, /(?:width|height|border-radius):/,
+      "Both channels must inherit the same circular shape");
+    return background;
+  });
+  assert.notEqual(backgrounds[0], backgrounds[1], "Email and WeChat should be distinguishable at a glance");
+});

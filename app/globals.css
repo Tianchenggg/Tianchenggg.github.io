@@ -691,9 +691,26 @@ img {
 .contact-wechat {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  min-height: 32px;
+  gap: 9px;
+  min-height: 40px;
 }
+
+.contact-icon {
+  display: inline-grid;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 0.45);
+  border-radius: 50%;
+  color: #fff;
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.25), 0 3px 8px rgb(30 66 92 / 0.12);
+}
+
+.contact-icon--email { background: linear-gradient(145deg, #38a2ee, #2671da); }
+.contact-icon--wechat { background: linear-gradient(145deg, #28ce69, #09a844); }
+.contact-icon > svg,
+.contact-icon > img { display: block; }
 
 .contact-email { color: inherit; text-underline-offset: 4px; }
 .contact-email:hover { color: #314c89; text-decoration: underline; }

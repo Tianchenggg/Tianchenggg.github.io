@@ -151,6 +151,19 @@ test("server-renders the finished research portfolio", async t => {
   assert.match(wechat?.textContent ?? "", /WeChat/);
   assert.match(wechat?.textContent ?? "", /Tancyne/);
   assert.equal(contacts.querySelectorAll("a").length, 1, "WeChat must be readable text, not an invented external link");
+  const emailIcon = email.querySelector(".contact-icon.contact-icon--email");
+  const wechatIcon = wechat.querySelector(".contact-icon.contact-icon--wechat");
+  for (const icon of [emailIcon, wechatIcon]) {
+    assert.ok(icon, "Each contact method must have its own circular icon wrapper");
+    assert.equal(icon.getAttribute("aria-hidden"), "true", "Decorative icons must not repeat the adjacent contact label");
+  }
+  const envelope = emailIcon.querySelector("svg");
+  assert.ok(envelope, "Email must display an envelope symbol");
+  assert.equal(envelope.getAttribute("focusable"), "false", "The decorative envelope must not create a keyboard stop");
+  const wechatMark = wechatIcon.querySelector('img[src="/brand/wechat.svg"]');
+  assert.ok(wechatMark, "WeChat must use its recognizable brand mark rather than a generic chat bubble");
+  assert.equal(wechatMark.getAttribute("alt"), "");
+  assert.equal(contacts.querySelectorAll(".contact-icon").length, 2);
   assert.match(html, /Undergraduate/);
   assert.match(html, /Master(?:’|'|&#x27;)s/);
   const affiliationNames = [...homeDocument.querySelectorAll("#home .hero-affiliations .affiliation-copy > strong")]
@@ -514,6 +527,9 @@ test("ships the GitHub Pages export and social assets", async () => {
     access(new URL("../out/images/paper-latticemind-1000.webp", import.meta.url)),
     access(new URL("../out/brand/huggingface.svg", import.meta.url)),
     access(new URL("../out/brand/github-mark.svg", import.meta.url)),
+    access(new URL("../public/brand/wechat.svg", import.meta.url)),
+    access(new URL("../out/brand/wechat.svg", import.meta.url)),
+    access(new URL("../docs/brand/wechat.svg", import.meta.url)),
     access(new URL("../out/brand/hust-seal.jpg", import.meta.url)),
     access(new URL("../out/brand/bupt-seal.jpg", import.meta.url)),
     access(new URL("../out/brand/qmul-logo.svg", import.meta.url)),

@@ -585,17 +585,18 @@ export default function Home() {
               </nav>
               <div className="contact-links" role="group" aria-label={copy.contactLabel}>
                 <a className="contact-email" href="mailto:tianchenghe77bupt@gmail.com">
-                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" aria-hidden="true" focusable="false">
-                    <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" strokeWidth="1.5" />
-                    <path d="m4 7 8 6 8-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <span className="contact-icon contact-icon--email" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" focusable="false">
+                      <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" strokeWidth="1.7" />
+                      <path d="m4 7 8 6 8-6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
                   <span>tianchenghe77bupt@gmail.com</span>
                 </a>
                 <span className="contact-wechat">
-                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" aria-hidden="true" focusable="false">
-                    <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-5.5a9 9 0 0 1-.9-4A8.5 8.5 0 0 1 12.5 3a8.5 8.5 0 0 1 8.5 8.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                    <path d="M9 11h.01M13 11h.01M17 11h.01" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" />
-                  </svg>
+                  <span className="contact-icon contact-icon--wechat" aria-hidden="true">
+                    <img src="/brand/wechat.svg" width="20" height="20" alt="" />
+                  </span>
                   <span>{copy.wechat}<span className="contact-separator" aria-hidden="true"> · </span><span className="contact-handle">Tancyne</span></span>
                 </span>
               </div>
