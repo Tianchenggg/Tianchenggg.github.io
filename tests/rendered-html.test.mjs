@@ -110,6 +110,15 @@ test("server-renders the finished research portfolio", async () => {
     assert.match(element, /data-running="false"/, "Ambient motion must wait for visibility before starting");
     assert.match(element, /aria-hidden="true"/, "Decorative motion must not enter the accessibility tree");
   }
+  const fluidMarkup = [...html.matchAll(/<div class="card-fluid"[^>]*>[\s\S]*?<\/div>/g)].map(([element]) => element);
+  assert.equal(fluidMarkup.length, 10, "Each publication, award row, and project must have a shared fluid backdrop");
+  for (const backdrop of fluidMarkup) {
+    for (const color of ["gold", "rose", "violet", "cyan"]) {
+      assert.match(backdrop, new RegExp(`<span class="fluid-color is-${color}"></span>`));
+    }
+    assert.equal(backdrop.match(/class="fluid-color /g)?.length, 4);
+    assert.doesNotMatch(backdrop, /<(?:canvas|video|img)\b/, "Fluid colors must not add media downloads or a canvas render loop");
+  }
   assert.match(html, />AI Scientist</);
   assert.doesNotMatch(html, /AI Researcher/i);
   assert.match(html, /class="hero-info-rail"/);

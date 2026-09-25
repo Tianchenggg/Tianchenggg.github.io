@@ -7,6 +7,7 @@ import {
 } from "react";
 import SectionSwitcher from "./section-switcher";
 import AmbientMotionControl from "./ambient-motion";
+import FluidBackdrop from "./fluid-backdrop";
 
 type Language = "en" | "zh";
 type LocalizedText = Record<Language, string>;
@@ -611,7 +612,7 @@ export default function Home() {
                   data-venue={publication.venue.split(" ")[0]}
                   key={publication.title.en}
                 >
-                  <div className="card-fluid" data-ambient="" data-running="false" aria-hidden="true" />
+                  <FluidBackdrop />
                   <figure className="publication-visual">
                     <img
                       src={publication.image}
@@ -669,7 +670,7 @@ export default function Home() {
           <ol className="award-list" aria-label={copy.awardsListLabel}>
             {awards.map((award) => (
               <li className="award-item" key={award.year}>
-                <div className="card-fluid" data-ambient="" data-running="false" aria-hidden="true" />
+                <FluidBackdrop />
                 <time dateTime={award.year}>{award.year}</time>
                 <span className={`award-icon ${award.icon.className}`}>
                   <img
@@ -697,7 +698,7 @@ export default function Home() {
           </div>
 
           <div className="project-panel">
-            <div className="card-fluid" data-ambient="" data-running="false" aria-hidden="true" />
+            <FluidBackdrop />
             <div className="project-topline">
               <div>
                 <span className="project-kicker">{copy.projectKicker}</span>
