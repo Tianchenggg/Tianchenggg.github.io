@@ -31,6 +31,7 @@ function setup(t, options = {}) {
   let now = 0;
   let nextHandle = 1;
   let disposed = false;
+  let measurementCount = 0;
   const frames = new Map();
   const timers = new Map();
   const captures = new Set();
@@ -53,7 +54,10 @@ function setup(t, options = {}) {
   Object.defineProperty(doc.documentElement, "scrollHeight", { configurable: true, get: () => geometry.pageHeight });
   nav.getBoundingClientRect = () => new win.DOMRect(0, 0, geometry.navWidth, 44);
   ids.forEach((id, index) => {
-    doc.getElementById(id).getBoundingClientRect = () => new win.DOMRect(0, geometry.tops[index] - scrollY, 1000, 400);
+    doc.getElementById(id).getBoundingClientRect = () => {
+      measurementCount += 1;
+      return new win.DOMRect(0, geometry.tops[index] - scrollY, 1000, 400);
+    };
   });
   nav.setPointerCapture = id => { captures.add(id); };
   nav.hasPointerCapture = id => captures.has(id);
@@ -188,6 +192,7 @@ function setup(t, options = {}) {
     get active() { return active; },
     get scrollY() { return scrollY; },
     get timerCount() { return timers.size; },
+    get measurementCount() { return measurementCount; },
     click, pointer, scroll, event, flushFrames, advance, dispose, restoreHash,
     motionChange: matches => { motion.matches = matches; motion.dispatchEvent(new win.Event("change")); },
     layoutChange: () => observers.filter(observer => !observer.disconnected).forEach(observer => observer.callback()),
@@ -245,6 +250,24 @@ test("wheel interruption stops owned motion and resumes the actual scroll select
   assert.equal(h.active, 1);
   h.advance(500);
   assert.equal(h.active, 1, "the cancelled navigation must not return later");
+});
+
+test("ordinary wheel, touch, and keyboard scrolling never moves the viewport or rereads section geometry", t => {
+  const h = setup(t);
+  const measurements = h.measurementCount;
+  for (const y of [100, 300, 700, 1500, 1950, 2200, 1800, 1000, 0]) {
+    h.win.dispatchEvent(new h.win.WheelEvent("wheel", { deltaY: 40 }));
+    h.scroll(y);
+  }
+  h.event("touchstart");
+  h.scroll(800);
+  h.doc.body.dispatchEvent(new h.win.KeyboardEvent("keydown", { key: "PageDown", bubbles: true }));
+  h.scroll(2200);
+  h.advance(500);
+  assert.equal(h.active, 3);
+  assert.equal(h.scrollCalls.length, 0);
+  assert.equal(h.historyCalls.length, 0);
+  assert.equal(h.measurementCount, measurements, "manual scrolling uses cached section geometry");
 });
 
 test("explicit short-section destinations survive shared bottom clamping until user scroll intent", t => {
@@ -397,6 +420,42 @@ test("an initial clamped hash preserves its explicit section without scrolling",
   assert.equal(h.active, 2);
   assert.equal(h.scrollCalls.length, 0);
   assert.equal(h.historyCalls.length, 0);
+});
+
+for (const interruption of ["wheel", "resize", "motion", "layout"]) {
+  test(`${interruption} during an initial hash restoration never cancels browser-owned scrolling`, t => {
+    const h = setup(t, { hash: "#life", scrollY: 300 });
+    if (interruption === "motion") h.motionChange(true);
+    else if (interruption === "layout") {
+      h.geometry.tops = [0, 600, 2000, 2400];
+      h.layoutChange();
+    } else h.event(interruption);
+    h.flushFrames();
+    h.advance(500);
+    assert.equal(h.scrollCalls.length, 0);
+    assert.equal(h.historyCalls.length, 0);
+  });
+}
+
+test("a history restoration without a section hash abandons owned navigation without issuing a stop-scroll", t => {
+  const h = setup(t);
+  h.click(3);
+  h.scroll(700);
+  h.restoreHash("", 100);
+  h.advance(500);
+  assert.equal(h.active, 0);
+  assert.deepEqual(h.scrollCalls, [{ top: 2148, behavior: "smooth" }]);
+});
+
+test("wheel input during a pending history restoration never issues another scroll", t => {
+  const h = setup(t);
+  h.click(3);
+  h.restoreHash("#research", 300);
+  h.event("wheel");
+  h.scroll(700);
+  h.advance(500);
+  assert.equal(h.active, 1);
+  assert.deepEqual(h.scrollCalls, [{ top: 2148, behavior: "smooth" }]);
 });
 
 test("layout changes invalidate a stale pending target and use new geometry", t => {

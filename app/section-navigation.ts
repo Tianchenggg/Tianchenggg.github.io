@@ -14,7 +14,7 @@ export function attachSectionNavigation(nav: HTMLElement, ids: readonly string[]
   let idleTimer = 0;
   let disposed = false;
   let suppressClick = false;
-  let pending: { index: number; y: number } | null = null;
+  let pending: { index: number; y: number; ownsScroll: boolean } | null = null;
   let settled: { index: number; y: number } | null = null;
   let drag: { id: number; startX: number; startY: number; x: number; origin: number; width: number; moved: boolean } | null = null;
 
@@ -56,16 +56,17 @@ export function attachSectionNavigation(nav: HTMLElement, ids: readonly string[]
   };
   const interrupt = (update = true) => {
     window.clearTimeout(idleTimer);
-    const wasNavigating = pending !== null;
+    const ownsScroll = pending?.ownsScroll;
     pending = null;
     settled = null;
-    if (wasNavigating) window.scrollTo({ top: window.scrollY, behavior: "instant" });
+    // Hash restoration is browser-owned. Only cancel motion we actually started.
+    if (ownsScroll) window.scrollTo({ top: window.scrollY, behavior: "instant" });
     if (update) schedule();
   };
   const navigate = (index: number) => {
     measure();
     settled = null;
-    pending = { index, y: targetY(index) };
+    pending = { index, y: targetY(index), ownsScroll: true };
     commit(index);
     const hash = `#${ids[index]}`;
     if (window.location.hash !== hash) window.history.pushState(null, "", hash);
@@ -147,7 +148,7 @@ export function attachSectionNavigation(nav: HTMLElement, ids: readonly string[]
   };
   const onPointerUp = (event: PointerEvent) => { if (event.pointerId === drag?.id) endDrag(true); };
   const onPointerCancel = (event: PointerEvent) => { if (event.pointerId === drag?.id) endDrag(false); };
-  const onIntent = () => { interrupt(); };
+  const onIntent = () => { if (pending || settled) interrupt(); };
   const onOutsidePointer = (event: PointerEvent) => { if (pending && !nav.contains(event.target as Node)) interrupt(); };
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Escape") { endDrag(false); interrupt(); return; }
@@ -157,13 +158,14 @@ export function attachSectionNavigation(nav: HTMLElement, ids: readonly string[]
   const onBlur = () => { endDrag(false); interrupt(); };
   const onResize = () => { endDrag(false); interrupt(); measure(); schedule(); };
   const onHashChange = () => {
-    endDrag(false);
     window.clearTimeout(idleTimer);
+    pending = null;
+    settled = null;
+    endDrag(false);
     measure();
     const index = ids.indexOf(window.location.hash.slice(1));
     if (index < 0) { interrupt(); return; }
-    pending = { index, y: targetY(index) };
-    settled = null;
+    pending = { index, y: targetY(index), ownsScroll: false };
     commit(index);
     // Back/forward restoration belongs to the browser: never start a second scroll.
     armIdle();
@@ -175,12 +177,12 @@ export function attachSectionNavigation(nav: HTMLElement, ids: readonly string[]
     if (settled && Math.abs(targetY(settled.index) - settled.y) > 2) settled = null;
     schedule();
   };
-  const onMotionPreference = () => { if (motion.matches && pending) window.scrollTo({ top: pending.y, behavior: "instant" }); };
+  const onMotionPreference = () => { if (motion.matches && pending?.ownsScroll) window.scrollTo({ top: pending.y, behavior: "instant" }); };
 
   measure();
   const initial = ids.indexOf(window.location.hash.slice(1));
   if (initial >= 0) {
-    pending = { index: initial, y: targetY(initial) };
+    pending = { index: initial, y: targetY(initial), ownsScroll: false };
     commit(initial);
     if (Math.abs(window.scrollY - pending.y) <= 2) finishNavigation(pending);
     else armIdle();

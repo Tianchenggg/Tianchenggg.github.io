@@ -21,22 +21,6 @@ function cssBlock(source, marker) {
   assert.fail(`Missing closing brace: ${marker}`);
 }
 
-function assertCompositorOnlyKeyframes(source, name) {
-  const frames = cssBlock(source, `@keyframes ${name}`);
-  const properties = [
-    ...new Set(
-      [...frames.matchAll(/\b([a-z-]+)\s*:/gi)].map((match) => match[1]),
-    ),
-  ].sort();
-
-  assert.deepEqual(
-    properties,
-    ["opacity", "transform"],
-    `${name} must animate only opacity and transform`,
-  );
-  assert.doesNotMatch(frames, /(?:^|-)filter\s*:/i);
-}
-
 function cssRulesForSelector(source, selector) {
   const withoutComments = source.replace(/\/\*[\s\S]*?\*\//g, "");
   return [...withoutComments.matchAll(/([^{}]+)\{([^{}]*)}/g)]
@@ -96,6 +80,10 @@ test("server-renders the finished research portfolio", async t => {
     assert.match(switcherMarkup, new RegExp(`<a\\b[^>]*href="#${id}"`));
   }
   assert.doesNotMatch(switcherMarkup, /section-switcher-drag-handle/);
+  assert.equal(switcherMarkup.match(/class="section-switcher-thumb"/g)?.length, 1);
+  assert.match(switcherMarkup, /class="section-switcher-thumb"[^>]*aria-hidden="true"/);
+  assert.doesNotMatch(switcherMarkup, /section-switcher-lens-labels|<svg\b|<canvas\b/,
+    "Glass must not duplicate text or add a rendering loop to the navigation");
   assert.match(
     html,
     /class="profile-link profile-huggingface"[^>]*href="https:\/\/huggingface\.co\/htcwang"/,
@@ -280,11 +268,10 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /--radius-card:\s*24px/);
   assert.match(css, /--muted-light:\s*#5a6f85/i);
   assert.match(css, /aspect-ratio:\s*2\s*\/\s*1/);
-  assert.match(css, /\.site-header-layout\s*{[^}]*display:\s*grid[^}]*grid-template-columns:\s*minmax\(56px,\s*1fr\)\s+minmax\(0,\s*420px\)\s+minmax\(56px,\s*1fr\)/s);
+  assert.match(css, /\.site-header-layout\s*{[^}]*display:\s*grid/s);
   assert.match(css, /\.site-header-inner\s*{[^}]*display:\s*block[^}]*width:\s*100%/s);
-  assert.match(css, /\.language-toggle\s*{[^}]*min-height:\s*53px/s);
+  assert.match(css, /\.language-toggle\s*{[^}]*min-height:/s);
   assert.match(css, /\.language-option\.is-active\s*{/);
-  assert.match(css, /grid-template-columns:\s*56px\s+minmax\(0,\s*1fr\)\s+56px/);
   assert.match(css, /\.hero-info-rail\s*{/);
   assert.match(css, /\.hero-affiliations\s*{/);
   assert.match(css, /\.hero-profiles\s*{/);
@@ -293,10 +280,8 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /\.award-icon\.is-bupt img\s*{/);
   assert.match(css, /\.award-icon\.is-national img\s*{/);
   assert.match(css, /min-height:\s*100svh/);
-  assert.match(css, /@supports\s*\(animation-timeline:\s*view\(\)\)/);
-  assert.match(css, /animation-timeline:\s*view\(block\)/);
-  assert.match(css, /@keyframes\s+content-arrive/);
-  assert.doesNotMatch(css, /@keyframes\s+(?:hero-deemphasize|research-card-focus|research-heading-focus|award-card-focus|project-layer-reveal)/);
+  assert.doesNotMatch(css, /(?:animation|view|scroll)-timeline\s*:/);
+  assert.doesNotMatch(css, /@keyframes\s+(?:content-arrive|hero-deemphasize|research-card-focus|research-heading-focus|award-card-focus|project-layer-reveal)/);
   assert.match(css, /prefers-reduced-motion:\s*no-preference/);
   assert.match(css, /animation:\s*none\s*!important/);
   assert.match(css, /filter:\s*none/);
@@ -326,8 +311,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.doesNotMatch(css, /width:\s*calc\(100%\s*\/\s*3\)/);
 
   assert.match(cssBlock(css, "html {"), /scroll-padding-top:\s*var\(--section-offset\)/);
-  assert.match(css, /--section-offset:\s*92px/);
-  assert.match(css, /--section-offset:\s*72px/);
+  assert.match(cssBlock(css, "html {"), /scroll-behavior:\s*auto/);
   for (const id of ["home", "research", "awards", "life"]) {
     assert.doesNotMatch(cssRulesForSelector(css, `#${id}`).join("\n"), /scroll-margin(?:-top|-block(?:-start)?)?\s*:/);
   }
@@ -342,55 +326,8 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /\.life-row\s*{/);
   assert.doesNotMatch(css, /\.(?:project-panel|project-topline|project-main|project-flow|metric-list)\b/);
 
-  assertCompositorOnlyKeyframes(css, "content-arrive");
-  const arrivalFrames = cssBlock(css, "@keyframes content-arrive");
-  const arrivalOpacities = [...arrivalFrames.matchAll(/opacity:\s*([\d.]+)/g)]
-    .map(([, value]) => Number(value));
-  assert.ok(arrivalOpacities.length >= 2, "Arrival must have visible start and end states");
-  assert.ok(arrivalOpacities.every((value) => value >= 0.75 && value <= 1), "Arrival must not hide readable content");
-  assert.ok(arrivalOpacities.every((value, index) => index === 0 || value >= arrivalOpacities[index - 1]), "Arrival must not fade content out again");
-  const arrivalEnd = arrivalFrames.match(/(?:to|100%)\s*{([^}]*)}/)?.[1] ?? "";
-  assert.match(arrivalEnd, /opacity:\s*1\s*;/);
-  assert.match(arrivalEnd, /transform:\s*(?:none|translate3d\(0,\s*0,\s*0\))\s*;/);
-
-  const viewTimelineRules = cssBlock(css, "@supports (animation-timeline: view())");
-  assert.match(
-    viewTimelineRules,
-    /@media\s*\(prefers-reduced-motion:\s*no-preference\)\s*{/,
-  );
-  const animatedContentSelectors = [
-    ".section-heading",
-    ".publication-card",
-    ".award-item",
-    ".life-row",
-  ];
-  for (const selector of animatedContentSelectors) {
-    const declarations = cssRulesForSelector(viewTimelineRules, selector).join("\n");
-    assert.match(declarations, /animation:\s*content-arrive\b[^;]*\bboth\b/, `${selector} must retain its final visible state`);
-    assert.match(declarations, /animation-timeline:\s*view\(block\)/);
-    assert.match(declarations, /animation-range:\s*entry 0% cover 22%/, `${selector} must finish its reveal before the reading area`);
-  }
-  for (const selector of [".hero", ".life-photo", ".life-photo > img", ".life-gallery"]) {
-    assert.doesNotMatch(cssRulesForSelector(viewTimelineRules, selector).join("\n"), /animation(?:-name|-timeline)?\s*:/, `${selector} must not add a second content fade`);
-  }
-  assert.doesNotMatch(viewTimelineRules, /animation-range:[^;]*\bexit\b/);
-  for (const selector of animatedContentSelectors) {
-    assert.doesNotMatch(cssRulesForSelector(css, `${selector}:hover`).join("\n"), /opacity\s*:/, "Hover must not snap scroll opacity to a different value");
-  }
-
   const reducedMotionRules = cssBlock(css, "@media (prefers-reduced-motion: reduce)");
-  for (const selector of [".research .section-heading", ".awards-section .section-heading", ".life-section .section-heading", ...animatedContentSelectors.slice(1)]) {
-    const declarations = [
-      ...cssRulesForSelector(reducedMotionRules, selector),
-      ...(selector.endsWith(" .section-heading") ? cssRulesForSelector(reducedMotionRules, ".section-heading") : []),
-    ].join("\n");
-    assert.match(declarations, /animation:\s*none\s*!important/, `${selector} must respect reduced motion`);
-    assert.match(declarations, /opacity:\s*1/);
-    assert.match(declarations, /transform:\s*none/);
-  }
   assert.match(reducedMotionRules, /animation:\s*none\s*!important/);
-  assert.match(reducedMotionRules, /filter:\s*none/);
-  assert.match(reducedMotionRules, /opacity:\s*1/);
   assert.doesNotMatch(css, /\.hero-socials\s*{|\.hero-social-link\s*{/);
   assert.doesNotMatch(layout, /AI Researcher/i);
   assert.match(switcher, /aria-current/);
@@ -418,9 +355,8 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(switcher, /aria-label=\{ariaLabel\}/);
   assert.doesNotMatch(switcher, /--lens-light-x/);
   assert.doesNotMatch(switcher, /section-switcher-lens-labels|--drag-label-x/);
-  assert.match(css, /backdrop-filter:\s*blur\(14px\)\s+saturate\(125%\)/);
+  assert.match(cssBlock(css, ".site-header-inner {"), /backdrop-filter:\s*blur\([\d.]+px\)\s+saturate\([\d.]+%?\)/);
   assert.match(css, /cubic-bezier\(0\.22,\s*1,\s*0\.36,\s*1\)/);
-  assert.match(css, /scale\(1\.018\)/);
   assert.doesNotMatch(css, /font-weight\s+170ms/);
   assert.doesNotMatch(css, /--lens-light-x/);
   assert.doesNotMatch(css, /section-switcher-lens-labels|--drag-label-x/);

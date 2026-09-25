@@ -9,6 +9,7 @@ import SectionSwitcher from "./section-switcher";
 import AmbientMotionControl from "./ambient-motion";
 import FluidBackdrop from "./fluid-backdrop";
 import LifeGallery from "./life-gallery";
+import NavGlassOptics from "./nav-glass-optics";
 
 type Language = "en" | "zh";
 type LocalizedText = Record<Language, string>;
@@ -458,6 +459,7 @@ export default function Home() {
       </a>
 
       <header className="site-header">
+        <NavGlassOptics />
         <div className="site-header-layout">
           <button
             className="language-toggle"

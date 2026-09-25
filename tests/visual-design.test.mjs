@@ -23,6 +23,84 @@ function blockAt(marker, start = css.indexOf(marker)) {
   assert.fail(`Unclosed CSS block: ${marker}`);
 }
 
+test("all reading content stays visible during native continuous page scrolling", () => {
+  assert.match(rulesFor("html")[0], /scroll-behavior:\s*auto\s*;/,
+    "Smooth scrolling should be requested only by explicit navigation, not imposed on every scroll operation");
+  assert.doesNotMatch(css, /(?:animation|scroll|view)-timeline\s*:/);
+  assert.doesNotMatch(css, /\b(?:view|scroll)\s*\(/);
+  assert.doesNotMatch(css, /content-arrive|hero-deemphasize|research-card-focus|award-card-focus/);
+  assert.doesNotMatch(css, /scroll-snap-(?:type|align|stop)\s*:/,
+    "Reading the page must not snap or redirect the visitor's scroll position");
+  const content = [
+    ".hero", ".research", ".awards-section", ".life-section", ".section-heading",
+    ".publication-card", ".award-item", ".life-gallery", ".life-row", ".life-photo",
+  ];
+  for (const selector of content) {
+    const rules = rulesFor(selector).join("\n");
+    for (const [, value] of rules.matchAll(/\banimation(?:-name)?\s*:\s*([^;]+);/g)) {
+      assert.match(value, /^none(?:\s*!important)?$/, `${selector} must not animate reading content in or out`);
+    }
+    for (const [, value] of rules.matchAll(/\bopacity\s*:\s*([^;]+);/g)) {
+      assert.match(value, /^1(?:\s*!important)?$/, `${selector} must remain fully visible`);
+    }
+    assert.doesNotMatch(rules, /(?:visibility:\s*hidden|content-visibility:\s*(?:auto|hidden)|filter:\s*(?:blur|grayscale))/,
+      `${selector} must never be hidden, blurred, or desaturated by the scrolling mechanism`);
+  }
+});
+
+test("navigation has a larger centered desktop layout and readable touch targets at every breakpoint", () => {
+  const desktopLayout = rulesFor(".site-header-layout")[0];
+  const tracks = desktopLayout.match(/grid-template-columns:\s*(minmax\([^,]+,\s*1fr\))\s+minmax\(0,\s*(\d+)px\)\s+\1\s*;/);
+  assert.ok(tracks, "The centered navigation needs matching left and right grid tracks");
+  assert.ok(Number(tracks[2]) >= 560, "The desktop navigation should no longer be a small 420 px control");
+  const links = rulesFor(".section-switcher a");
+  assert.ok(Number(links[0].match(/min-height:\s*(\d+)px/)?.[1]) >= 52);
+  assert.ok(Number(links[0].match(/font-size:\s*([\d.]+)rem/)?.[1]) >= 0.95);
+  for (const rule of links) {
+    for (const [, height] of rule.matchAll(/min-height:\s*([\d.]+)px/g)) {
+      assert.ok(Number(height) >= 44, "Mobile navigation must preserve comfortable touch targets");
+    }
+    for (const [, size] of rule.matchAll(/font-size:\s*([^;]+);/g)) {
+      const remSizes = [...size.matchAll(/([\d.]+)rem/g)].map(([, value]) => Number(value));
+      assert.ok(remSizes.length && remSizes.every(value => value >= 0.75),
+        "Navigation text must not shrink to fit side controls on small phones");
+    }
+  }
+  const narrow = [...css.matchAll(/@media\s*\(max-width:\s*700px\)/g)]
+    .map(match => blockAt(match[0], match.index).body).join("\n");
+  assert.match(rulesFor(".site-header-inner", narrow).join("\n"), /grid-row:\s*2\s*;/,
+    "Narrow screens should give the navigation a full second row instead of squeezing its labels");
+  assert.match(rulesFor(".site-header-inner", narrow).join("\n"), /grid-column:\s*1\s*\/\s*-1\s*;/);
+  assert.match(rulesFor(".section-switcher a").join("\n"), /touch-action:\s*pan-y\s*;/);
+  assert.match(rulesFor(".section-switcher a:focus-visible").join("\n"), /outline:\s*2px\s+solid/);
+});
+
+test("glass uses one bounded backdrop layer, specular edges, and accessible opaque fallbacks", () => {
+  const outerGlass = rulesFor(".site-header-inner")[0];
+  assert.match(outerGlass, /backdrop-filter:\s*blur\([\d.]+px\)\s+saturate\([\d.]+%?\)/);
+  assert.match(outerGlass, /border-radius:/);
+  assert.match(outerGlass, /box-shadow:[^;]*\binset\b/s);
+  assert.match(rulesFor(".site-header-inner::before").join("\n"), /background:[^;]*(?:radial|linear)-gradient\(/s);
+  for (const [, selectors, declarations] of css.matchAll(/([^{}]+)\{([^{}]*)}/g)) {
+    for (const [, backdrop] of declarations.matchAll(/(?:^|;)\s*(?:-webkit-)?backdrop-filter\s*:\s*([^;]+);/g)) {
+      if (backdrop.trim() === "none") continue;
+      assert.equal(selectors.trim(), ".site-header-inner",
+        "Only the bounded header shell should blur the page; the thumb and full-width header must not blur again");
+    }
+  }
+  const thumb = rulesFor(".section-switcher-thumb").join("\n");
+  for (const [, backdrop] of thumb.matchAll(/(?:^|;)\s*(?:-webkit-)?backdrop-filter\s*:\s*([^;]+);/g)) {
+    assert.equal(backdrop.trim(), "none", "The moving thumb must not create a second filtered backdrop");
+  }
+  assert.doesNotMatch(css, /section-switcher-lens-labels|--drag-label-x/,
+    "The glass treatment must not duplicate navigation labels");
+  const opaque = blockAt("@media (prefers-reduced-transparency: reduce)").body;
+  assert.match(rulesFor(".site-header-inner", opaque).join("\n"), /backdrop-filter:\s*none/);
+  assert.match(rulesFor(".site-header-inner", opaque).join("\n"), /background:/);
+  const contrast = blockAt("@media (prefers-contrast: more)").body;
+  assert.match(rulesFor(".section-switcher-thumb", contrast).join("\n"), /border-color:/);
+});
+
 test("awards remain one full-width row per item at every CSS breakpoint", () => {
   const rules = rulesFor(".award-list");
   assert.ok(rules.length, "The award list must have explicit layout rules");
