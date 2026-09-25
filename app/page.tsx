@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import SectionSwitcher from "./section-switcher";
-import HeroSpectrum from "./hero-spectrum";
+import AmbientMotionControl from "./ambient-motion";
 
 type Language = "en" | "zh";
 type LocalizedText = Record<Language, string>;
@@ -491,13 +491,13 @@ export default function Home() {
             <SectionSwitcher labels={copy.navigation} ariaLabel={copy.navigationLabel} />
           </div>
 
-          <span className="site-header-balance" aria-hidden="true" />
+          <AmbientMotionControl labels={copy.motion} />
         </div>
       </header>
 
       <main className="portfolio-shell" id="content">
         <section className="hero section-pad" id="home">
-          <HeroSpectrum labels={copy.motion} />
+          <div className="hero-spectrum" data-ambient="" data-running="false" aria-hidden="true" />
           <div className="hero-copy">
             <p className="hero-eyebrow">{copy.role}</p>
             <h1>
@@ -611,6 +611,7 @@ export default function Home() {
                   data-venue={publication.venue.split(" ")[0]}
                   key={publication.title.en}
                 >
+                  <div className="card-fluid" data-ambient="" data-running="false" aria-hidden="true" />
                   <figure className="publication-visual">
                     <img
                       src={publication.image}
@@ -668,6 +669,7 @@ export default function Home() {
           <ol className="award-list" aria-label={copy.awardsListLabel}>
             {awards.map((award) => (
               <li className="award-item" key={award.year}>
+                <div className="card-fluid" data-ambient="" data-running="false" aria-hidden="true" />
                 <time dateTime={award.year}>{award.year}</time>
                 <span className={`award-icon ${award.icon.className}`}>
                   <img
@@ -695,6 +697,7 @@ export default function Home() {
           </div>
 
           <div className="project-panel">
+            <div className="card-fluid" data-ambient="" data-running="false" aria-hidden="true" />
             <div className="project-topline">
               <div>
                 <span className="project-kicker">{copy.projectKicker}</span>

@@ -35,6 +35,13 @@ function assertCompositorOnlyKeyframes(source, name) {
   assert.doesNotMatch(frames, /(?:^|-)filter\s*:/i);
 }
 
+function cssRulesForSelector(source, selector) {
+  const withoutComments = source.replace(/\/\*[\s\S]*?\*\//g, "");
+  return [...withoutComments.matchAll(/([^{}]+)\{([^{}]*)}/g)]
+    .filter(([, selectors]) => selectors.split(",").some((value) => value.trim() === selector))
+    .map(([, , declarations]) => declarations);
+}
+
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
@@ -82,6 +89,10 @@ test("server-renders the finished research portfolio", async () => {
   assert.equal(switcherMarkup.match(/>Awards</g)?.length, 1);
   assert.equal(switcherMarkup.match(/>Project</g)?.length, 1);
   assert.equal(switcherMarkup.match(/<a\b/g)?.length, 4);
+  for (const id of ["home", "research", "awards", "project"]) {
+    assert.match(switcherMarkup, new RegExp(`<a\\b[^>]*href="#${id}"`));
+  }
+  assert.doesNotMatch(switcherMarkup, /section-switcher-drag-handle/);
   assert.match(
     html,
     /class="profile-link profile-huggingface"[^>]*href="https:\/\/huggingface\.co\/htcwang"/,
@@ -91,6 +102,14 @@ test("server-renders the finished research portfolio", async () => {
   const headerMarkup = html.match(/<header class="site-header"[\s\S]*?<\/header>/)?.[0] ?? "";
   assert.doesNotMatch(headerMarkup, /Hugging Face|GitHub/);
   assert.match(headerMarkup, /class="section-switcher"/);
+  assert.match(headerMarkup, /<button\b[^>]*class="spectrum-toggle"[^>]*aria-label="Pause background motion"/);
+  assert.equal(html.match(/class="spectrum-toggle"/g)?.length, 1, "A single header control must pause all ambient motion");
+  const ambientMarkup = [...html.matchAll(/<[^>]+\bdata-ambient(?:="[^"]*")?[^>]*>/g)].map(([element]) => element);
+  assert.equal(ambientMarkup.length, 11, "Hero, publications, awards, and project must share ambient-motion control");
+  for (const element of ambientMarkup) {
+    assert.match(element, /data-running="false"/, "Ambient motion must wait for visibility before starting");
+    assert.match(element, /aria-hidden="true"/, "Decorative motion must not enter the accessibility tree");
+  }
   assert.match(html, />AI Scientist</);
   assert.doesNotMatch(html, /AI Researcher/i);
   assert.match(html, /class="hero-info-rail"/);
@@ -225,14 +244,8 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /min-height:\s*100svh/);
   assert.match(css, /@supports\s*\(animation-timeline:\s*view\(\)\)/);
   assert.match(css, /animation-timeline:\s*view\(block\)/);
-  assert.match(css, /animation-range:\s*cover 0% cover 100%/);
-  assert.doesNotMatch(css, /@keyframes\s+research-card-arrive/);
-  assert.match(css, /@keyframes\s+research-card-focus/);
-  assert.match(css, /@keyframes\s+research-heading-focus/);
-  assert.match(css, /@keyframes\s+hero-deemphasize/);
-  assert.match(css, /76%\s*{[^}]*opacity:\s*0\.45/s);
-  assert.match(css, /100%\s*{[^}]*opacity:\s*0\.22/s);
-  assert.match(css, /animation-range:\s*exit 0% exit 68%/);
+  assert.match(css, /@keyframes\s+content-arrive/);
+  assert.doesNotMatch(css, /@keyframes\s+(?:hero-deemphasize|research-card-focus|research-heading-focus|award-card-focus|project-layer-reveal)/);
   assert.match(css, /prefers-reduced-motion:\s*no-preference/);
   assert.match(css, /animation:\s*none\s*!important/);
   assert.match(css, /filter:\s*none/);
@@ -257,14 +270,16 @@ test("ships the GitHub Pages export and social assets", async () => {
   const thumbLayoutRule = cssBlock(css, ".section-switcher-thumb {");
   assert.match(thumbLayoutRule, /width:\s*calc\(100%\s*\/\s*4\)/);
 
-  const dragHandleRule = cssBlock(css, ".section-switcher-drag-handle {");
-  assert.match(dragHandleRule, /width:\s*calc\(100%\s*\/\s*4\)/);
+  assert.doesNotMatch(css, /\.section-switcher-drag-handle\b/);
+  assert.match(cssRulesForSelector(css, ".section-switcher a").join("\n"), /touch-action:\s*pan-y/);
   assert.doesNotMatch(css, /width:\s*calc\(100%\s*\/\s*3\)/);
 
-  assert.match(
-    css,
-    /#home,\s*#research,\s*#awards,\s*#project\s*{[^}]*scroll-margin-top:/s,
-  );
+  assert.match(cssBlock(css, "html {"), /scroll-padding-top:\s*var\(--section-offset\)/);
+  assert.match(css, /--section-offset:\s*92px/);
+  assert.match(css, /--section-offset:\s*72px/);
+  for (const id of ["home", "research", "awards", "project"]) {
+    assert.doesNotMatch(cssRulesForSelector(css, `#${id}`).join("\n"), /scroll-margin(?:-top|-block(?:-start)?)?\s*:/);
+  }
 
   const awardItemRule =
     [...css.matchAll(/\.award-item\s*{([^}]*)}/gs)]
@@ -283,75 +298,52 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(css, /\.project-flow\s*{/);
   assert.match(css, /\.metric-list\s*{[^}]*display:\s*grid/s);
 
-  const cardFocusFrames = cssBlock(css, "@keyframes research-card-focus");
-  assert.match(cardFocusFrames, /transform:\s*translate3d/);
-  assert.doesNotMatch(cardFocusFrames, /scale:/);
-
-  const heroFrames = cssBlock(css, "@keyframes hero-deemphasize");
-  assert.match(heroFrames, /opacity:/);
-  assert.doesNotMatch(heroFrames, /scale:|transform:/);
-
-  assertCompositorOnlyKeyframes(css, "award-card-focus");
-  assertCompositorOnlyKeyframes(css, "project-panel-reveal");
-  assertCompositorOnlyKeyframes(css, "project-layer-reveal");
+  assertCompositorOnlyKeyframes(css, "content-arrive");
+  const arrivalFrames = cssBlock(css, "@keyframes content-arrive");
+  const arrivalOpacities = [...arrivalFrames.matchAll(/opacity:\s*([\d.]+)/g)]
+    .map(([, value]) => Number(value));
+  assert.ok(arrivalOpacities.length >= 2, "Arrival must have visible start and end states");
+  assert.ok(arrivalOpacities.every((value) => value >= 0.75 && value <= 1), "Arrival must not hide readable content");
+  assert.ok(arrivalOpacities.every((value, index) => index === 0 || value >= arrivalOpacities[index - 1]), "Arrival must not fade content out again");
+  const arrivalEnd = arrivalFrames.match(/(?:to|100%)\s*{([^}]*)}/)?.[1] ?? "";
+  assert.match(arrivalEnd, /opacity:\s*1\s*;/);
+  assert.match(arrivalEnd, /transform:\s*(?:none|translate3d\(0,\s*0,\s*0\))\s*;/);
 
   const viewTimelineRules = cssBlock(css, "@supports (animation-timeline: view())");
   assert.match(
     viewTimelineRules,
     /@media\s*\(prefers-reduced-motion:\s*no-preference\)\s*{/,
   );
-  assert.match(
-    viewTimelineRules,
-    /\.hero\s*{[^}]*animation:\s*hero-deemphasize linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*exit 0% exit 68%/s,
-  );
-  assert.match(
-    viewTimelineRules,
-    /\.publication-card\s*{[^}]*animation:\s*research-card-focus linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*cover 0% cover 100%/s,
-  );
-  assert.match(
-    viewTimelineRules,
-    /\.awards-section \.section-heading\s*{[^}]*animation:\s*research-heading-focus linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*cover 0% cover 100%/s,
-  );
-  assert.match(
-    viewTimelineRules,
-    /\.award-item\s*{[^}]*animation:\s*award-card-focus linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*cover 0% cover 88%/s,
-  );
-  assert.match(
-    viewTimelineRules,
-    /\.award-item:nth-child\(2\)\s*{[^}]*animation-range:\s*cover 6% cover 94%/s,
-  );
-  assert.match(
-    viewTimelineRules,
-    /\.award-item:nth-child\(3\)\s*{[^}]*animation-range:\s*cover 12% cover 100%/s,
-  );
-  assert.match(
-    viewTimelineRules,
-    /\.project-section \.section-heading\s*{[^}]*animation:\s*project-layer-reveal linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*entry 0% entry 100%/s,
-  );
-  assert.match(
-    viewTimelineRules,
-    /\.project-panel\s*{[^}]*animation:\s*project-panel-reveal linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*entry 0% cover 45%/s,
-  );
-  assert.match(
-    viewTimelineRules,
-    /\.project-topline,\s*\.project-main,\s*\.metric-list\s*{[^}]*animation:\s*project-layer-reveal linear both[^}]*animation-timeline:\s*view\(block\)[^}]*animation-range:\s*entry 0% entry 100%/s,
-  );
-  assert.match(
-    viewTimelineRules,
-    /\.project-panel:focus-within,\s*\.project-topline:focus-within\s*{[^}]*opacity:\s*1\s*!important[^}]*transform:\s*none\s*!important/s,
-  );
-  assert.match(viewTimelineRules, /\.publication-card:focus-within\s*{[^}]*opacity:\s*1\s*!important/s);
-  assert.match(viewTimelineRules, /\.publication-card:hover\s*{[^}]*opacity:\s*1\s*!important/s);
+  const animatedContentSelectors = [
+    ".section-heading",
+    ".publication-card",
+    ".award-item",
+    ".project-panel",
+  ];
+  for (const selector of animatedContentSelectors) {
+    const declarations = cssRulesForSelector(viewTimelineRules, selector).join("\n");
+    assert.match(declarations, /animation:\s*content-arrive\b[^;]*\bboth\b/, `${selector} must retain its final visible state`);
+    assert.match(declarations, /animation-timeline:\s*view\(block\)/);
+    assert.match(declarations, /animation-range:\s*entry 0% cover 22%/, `${selector} must finish its reveal before the reading area`);
+  }
+  for (const selector of [".hero", ".project-topline", ".project-main", ".metric-list"]) {
+    assert.doesNotMatch(cssRulesForSelector(viewTimelineRules, selector).join("\n"), /animation(?:-name|-timeline)?\s*:/, `${selector} must not add a second content fade`);
+  }
+  assert.doesNotMatch(viewTimelineRules, /animation-range:[^;]*\bexit\b/);
+  for (const selector of animatedContentSelectors) {
+    assert.doesNotMatch(cssRulesForSelector(css, `${selector}:hover`).join("\n"), /opacity\s*:/, "Hover must not snap scroll opacity to a different value");
+  }
 
   const reducedMotionRules = cssBlock(css, "@media (prefers-reduced-motion: reduce)");
-  assert.match(reducedMotionRules, /\.hero,[\s\S]*\.publication-card,/);
-  const reducedAnimationReset = reducedMotionRules.match(
-    /\.hero,\s*\.research \.section-heading,\s*\.publication-card,\s*\.awards-section \.section-heading,\s*\.award-item,\s*\.project-section \.section-heading,\s*\.project-panel,\s*\.project-topline,\s*\.project-main,\s*\.metric-list\s*{([^}]*)}/s,
-  );
-  assert.ok(reducedAnimationReset, "Missing reduced-motion reset for Awards and Project");
-  assert.match(reducedAnimationReset[1], /animation:\s*none\s*!important/);
-  assert.match(reducedAnimationReset[1], /opacity:\s*1/);
-  assert.match(reducedAnimationReset[1], /transform:\s*none/);
+  for (const selector of [".research .section-heading", ".awards-section .section-heading", ".project-section .section-heading", ...animatedContentSelectors.slice(1)]) {
+    const declarations = [
+      ...cssRulesForSelector(reducedMotionRules, selector),
+      ...(selector.endsWith(" .section-heading") ? cssRulesForSelector(reducedMotionRules, ".section-heading") : []),
+    ].join("\n");
+    assert.match(declarations, /animation:\s*none\s*!important/, `${selector} must respect reduced motion`);
+    assert.match(declarations, /opacity:\s*1/);
+    assert.match(declarations, /transform:\s*none/);
+  }
   assert.match(reducedMotionRules, /animation:\s*none\s*!important/);
   assert.match(reducedMotionRules, /filter:\s*none/);
   assert.match(reducedMotionRules, /opacity:\s*1/);
@@ -377,17 +369,7 @@ test("ships the GitHub Pages export and social assets", async () => {
     sectionSource.indexOf('id: "awards"') <
       sectionSource.indexOf('id: "project"'),
   );
-  assert.match(switcher, /requestAnimationFrame/);
-  assert.match(switcher, /navigationLock/);
-  assert.match(switcher, /releaseNavigationAfterIdle/);
-  assert.match(switcher, /setPointerCapture/);
-  assert.match(switcher, /onPointerMove/);
-  assert.match(switcher, /section-switcher-drag-handle/);
-  assert.match(switcher, /--drag-x/);
-  assert.match(switcher, /previewIndex/);
-  assert.match(switcher, /ResizeObserver/);
-  assert.match(switcher, /sectionTops/);
-  assert.match(switcher, /activeIndexRef/);
+  assert.doesNotMatch(switcher, /section-switcher-drag-handle/);
   assert.match(switcher, /labels\[section\.labelKey\]/);
   assert.match(switcher, /aria-label=\{ariaLabel\}/);
   assert.doesNotMatch(switcher, /--lens-light-x/);
@@ -398,7 +380,6 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.doesNotMatch(css, /font-weight\s+170ms/);
   assert.doesNotMatch(css, /--lens-light-x/);
   assert.doesNotMatch(css, /section-switcher-lens-labels|--drag-label-x/);
-  assert.match(css, /\.section-switcher-drag-handle/);
   assert.doesNotMatch(css, /will-change:\s*transform/);
   assert.doesNotMatch(css, /liquid-(?:skew|stretch)/);
   const thumbRule = css.match(/\.section-switcher-thumb\s*{([^}]*)}/s)?.[1] ?? "";

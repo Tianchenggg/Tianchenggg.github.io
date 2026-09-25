@@ -21,4 +21,8 @@ Publication metadata was updated in September 2026 using the author's supplied a
 
 LatticeMind's overview is Figure 1 from [arXiv:2608.08236](https://arxiv.org/abs/2608.08236), checked against PDF page 4 and exported from the author's original figure as a 1000px WebP. Existing paper figures remain unchanged.
 
-The iridescent hero animates transforms only, pauses offscreen or when the tab is hidden, respects reduced-motion preferences, and includes a manual pause control.
+The iridescent hero and card highlights animate transforms only, pause offscreen or when the tab is hidden, and respect reduced-motion preferences. The header pause control stops all ambient motion. Scroll reveals share one gentle entrance and stay readable on exit; project children do not stack additional fades.
+
+Navigation uses native scrolling with a single header offset. Manual scroll input cancels an in-flight jump; explicit short-section destinations remain selected even when their anchors share the document's bottom limit. Real links handle clicks and keyboard activation, and horizontal dragging has a threshold and cancellation handling.
+
+`npm test` builds both targets and runs rendered-output, scroll geometry, and DOM interaction regression tests. The DOM tests use controlled layout and time; they complement, rather than replace, visual/device testing.
