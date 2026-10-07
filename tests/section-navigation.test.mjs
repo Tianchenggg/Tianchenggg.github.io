@@ -3,10 +3,9 @@ import test from "node:test";
 import { Window } from "happy-dom";
 import { attachSectionNavigation } from "../app/section-navigation.ts";
 
-const ids = ["home", "research", "awards", "life"];
-
 /** Keep browser-owned motion explicit while exercising the real DOM listeners. */
 function setup(t, options = {}) {
+  const ids = options.ids ?? ["home", "research", "awards", "life"];
   const win = new Window({
     url: `https://portfolio.test/${options.hash ?? ""}`,
     settings: {
@@ -198,6 +197,28 @@ function setup(t, options = {}) {
     layoutChange: () => observers.filter(observer => !observer.disconnected).forEach(observer => observer.callback()),
   };
 }
+
+test("five-section navigation includes Project without losing Awards or Life", t => {
+  const h = setup(t, {
+    ids: ["home", "research", "project", "awards", "life"],
+    tops: [0, 600, 2000, 2400, 3000],
+    navWidth: 500,
+  });
+  h.click(2);
+  h.scroll(1908, true);
+  assert.equal(h.active, 2);
+  assert.equal(h.anchors[2].getAttribute("aria-current"), "location");
+  h.click(3);
+  h.scroll(2308, true);
+  assert.equal(h.active, 3);
+  h.pointer("pointerdown", { index: 3, clientX: 350 });
+  h.pointer("pointermove", { index: 3, clientX: 450 });
+  h.pointer("pointerup", { index: 3, clientX: 450 });
+  h.scroll(2908, true);
+  assert.equal(h.active, 4);
+  assert.deepEqual(h.historyCalls, ["#project", "#awards", "#life"]);
+  assert.deepEqual(h.scrollCalls.map(call => call.top), [1908, 2308, 2908]);
+});
 
 test("rapid clicks replace navigation and ignore an earlier scrollend", t => {
   const h = setup(t);

@@ -101,6 +101,7 @@ const siteCopy = {
     navigation: {
       home: "Home",
       research: "Research",
+      project: "Project",
       awards: "Awards",
       life: "Life",
     },
@@ -124,6 +125,12 @@ const siteCopy = {
     contactLabel: "Contact",
     wechat: "WeChat",
     researchHeading: "Research",
+    projectHeading: "Project",
+    projectSummary: "A Python practice workspace with ACM and LeetCode modes, custom test cases, and in-browser judging.",
+    projectFeatures: ["100 problems", "17 topics", "Saved progress"],
+    projectImageAlt: "Hot 100 Python: problem list, Python editor, and test results",
+    projectDemo: "Try it online",
+    projectCode: "Source code",
     awardsHeading: "Awards",
     awardsListLabel: "Awards in reverse chronological order",
     lifeHeading: "Life",
@@ -137,6 +144,7 @@ const siteCopy = {
     navigation: {
       home: "首页",
       research: "研究",
+      project: "项目",
       awards: "奖项",
       life: "生活",
     },
@@ -159,6 +167,12 @@ const siteCopy = {
     contactLabel: "联系方式",
     wechat: "微信",
     researchHeading: "研究",
+    projectHeading: "项目",
+    projectSummary: "支持 ACM 与 LeetCode 双模式的 Python 在线刷题工具，可编写代码、自定义测试并即时判题。",
+    projectFeatures: ["100 道题", "17 类知识点", "进度自动保存"],
+    projectImageAlt: "Hot 100 Python 的题目列表、Python 编辑器与判题结果",
+    projectDemo: "在线使用",
+    projectCode: "项目源码",
     awardsHeading: "奖项",
     awardsListLabel: "按时间倒序排列的奖项",
     lifeHeading: "生活",
@@ -658,6 +672,40 @@ export default function Home() {
               );
             })}
           </div>
+        </section>
+
+        <section className="project-section section-pad" id="project" aria-labelledby="project-heading">
+          <div className="section-heading">
+            <h2 id="project-heading">{copy.projectHeading}</h2>
+          </div>
+          <article className="project-card" aria-labelledby="hot100-title">
+            <div className="project-preview">
+              <img
+                src="/images/project-hot100-preview.jpg"
+                alt={copy.projectImageAlt}
+                width="1280"
+                height="720"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div className="project-details">
+              <h3 id="hot100-title">Hot 100 Python</h3>
+              <p>{copy.projectSummary}</p>
+              <ul className="project-features">
+                {copy.projectFeatures.map(feature => <li key={feature}>{feature}</li>)}
+              </ul>
+              <div className="project-actions">
+                <a className="project-action" href="https://hot100-python.htcafasfadf.chatgpt.site/" target="_blank" rel="noreferrer">
+                  {copy.projectDemo}<span className="sr-only">{copy.opensInNewTab}</span>
+                </a>
+                <a className="project-action project-action--secondary" href="https://github.com/Tianchenggg/hot100-python" target="_blank" rel="noreferrer">
+                  <img src="/brand/github-mark.svg" alt="" width="18" height="18" aria-hidden="true" />
+                  {copy.projectCode}<span className="sr-only">{copy.opensInNewTab}</span>
+                </a>
+              </div>
+            </div>
+          </article>
         </section>
 
         <section

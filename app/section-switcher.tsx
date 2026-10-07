@@ -6,6 +6,7 @@ import { attachSectionNavigation } from "./section-navigation";
 const sections = [
   { id: "home", labelKey: "home" },
   { id: "research", labelKey: "research" },
+  { id: "project", labelKey: "project" },
   { id: "awards", labelKey: "awards" },
   { id: "life", labelKey: "life" },
 ] as const;
@@ -26,7 +27,7 @@ export default function SectionSwitcher({ labels, ariaLabel }: { labels: Section
       ref={switcherRef}
       className="section-switcher"
       aria-label={ariaLabel}
-      style={{ "--active-index": activeIndex } as CSSProperties}
+      style={{ "--active-index": activeIndex, "--section-count": sections.length } as CSSProperties}
     >
       <span className="section-switcher-thumb" aria-hidden="true" />
       {sections.map((section, index) => (

@@ -32,7 +32,7 @@ test("all reading content stays visible during native continuous page scrolling"
   assert.doesNotMatch(css, /scroll-snap-(?:type|align|stop)\s*:/,
     "Reading the page must not snap or redirect the visitor's scroll position");
   const content = [
-    ".hero", ".research", ".awards-section", ".life-section", ".section-heading",
+    ".hero", ".research", ".project-section", ".project-card", ".awards-section", ".life-section", ".section-heading",
     ".publication-card", ".award-item", ".life-gallery", ".life-row", ".life-photo",
   ];
   for (const selector of content) {
@@ -99,6 +99,17 @@ test("glass uses one bounded backdrop layer, specular edges, and accessible opaq
   assert.match(rulesFor(".site-header-inner", opaque).join("\n"), /background:/);
   const contrast = blockAt("@media (prefers-contrast: more)").body;
   assert.match(rulesFor(".section-switcher-thumb", contrast).join("\n"), /border-color:/);
+});
+
+test("project preview remains uncropped and stacks above details on mobile", () => {
+  assert.match(rulesFor(".project-card")[0], /display:\s*grid/);
+  const preview = rulesFor(".project-preview img").join("\n");
+  assert.match(preview, /object-fit:\s*contain/);
+  assert.match(preview, /aspect-ratio:\s*16\s*\/\s*9/);
+  assert.match(rulesFor(".project-action")[0], /min-height:\s*44px/);
+  const narrow = [...css.matchAll(/@media\s*\(max-width:\s*700px\)/g)]
+    .map(match => blockAt(match[0], match.index).body).join("\n");
+  assert.match(rulesFor(".project-card", narrow).join("\n"), /grid-template-columns:\s*minmax\(0,\s*1fr\)/);
 });
 
 test("awards remain one full-width row per item at every CSS breakpoint", () => {

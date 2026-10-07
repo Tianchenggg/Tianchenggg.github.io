@@ -74,9 +74,10 @@ test("server-renders the finished research portfolio", async t => {
   assert.equal(switcherMarkup.match(/>Research</g)?.length, 1);
   assert.equal(switcherMarkup.match(/>Awards</g)?.length, 1);
   assert.equal(switcherMarkup.match(/>Life</g)?.length, 1);
-  assert.doesNotMatch(switcherMarkup, />Project</);
-  assert.equal(switcherMarkup.match(/<a\b/g)?.length, 4);
-  for (const id of ["home", "research", "awards", "life"]) {
+  assert.equal(switcherMarkup.match(/>Project</g)?.length, 1);
+  assert.equal(switcherMarkup.match(/<a\b/g)?.length, 5);
+  assert.match(switcherMarkup, /--section-count:5/);
+  for (const id of ["home", "research", "project", "awards", "life"]) {
     assert.match(switcherMarkup, new RegExp(`<a\\b[^>]*href="#${id}"`));
   }
   assert.doesNotMatch(switcherMarkup, /section-switcher-drag-handle/);
@@ -241,7 +242,19 @@ test("server-renders the finished research portfolio", async t => {
     assert.match(image, /alt="[^\"]+"/);
   }
   assert.doesNotMatch(lifeMarkup, /card-fluid|data-ambient|<canvas\b|<video\b/);
-  assert.doesNotMatch(html, /Activation Revelation|id="project"|class="project-section/);
+  assert.doesNotMatch(html, /Activation Revelation/);
+  const projectMarkup = html.match(/<section class="project-section section-pad"[\s\S]*?<\/section>/)?.[0] ?? "";
+  assert.match(projectMarkup, /id="project"/);
+  assert.match(projectMarkup, /aria-labelledby="project-heading"/);
+  assert.match(projectMarkup, /<h2 id="project-heading">Project<\/h2>/);
+  assert.equal(projectMarkup.match(/<article\b/g)?.length, 1);
+  assert.match(projectMarkup, /Hot 100 Python/);
+  assert.match(projectMarkup, /href="https:\/\/hot100-python\.htcafasfadf\.chatgpt\.site\/"/);
+  assert.match(projectMarkup, /href="https:\/\/github\.com\/Tianchenggg\/hot100-python"/);
+  assert.match(projectMarkup, /src="\/images\/project-hot100-preview\.jpg"[^>]*width="1280"[^>]*height="720"[^>]*loading="lazy"[^>]*decoding="async"/);
+  assert.doesNotMatch(projectMarkup, /card-fluid|<canvas\b|<video\b/);
+  assert.ok(html.indexOf('id="research"') < html.indexOf('id="project"'));
+  assert.ok(html.indexOf('id="project"') < html.indexOf('id="awards"'));
   assert.match(papers.join(""), />Project</, "Publication project links must be retained");
   assert.match(html, /tiancheng-he-portrait-800\.webp/);
   assert.doesNotMatch(html, /RareAlert/);
@@ -309,11 +322,11 @@ test("ships the GitHub Pages export and social assets", async () => {
   const switcherRule = cssBlock(css, ".section-switcher {");
   assert.match(
     switcherRule,
-    /grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/,
+    /grid-template-columns:\s*repeat\(var\(--section-count\),\s*minmax\(0,\s*1fr\)\)/,
   );
 
   const thumbLayoutRule = cssBlock(css, ".section-switcher-thumb {");
-  assert.match(thumbLayoutRule, /width:\s*calc\(100%\s*\/\s*4\)/);
+  assert.match(thumbLayoutRule, /width:\s*calc\(100%\s*\/\s*var\(--section-count\)\)/);
 
   assert.doesNotMatch(css, /\.section-switcher-drag-handle\b/);
   assert.match(cssRulesForSelector(css, ".section-switcher a").join("\n"), /touch-action:\s*pan-y/);
@@ -321,7 +334,7 @@ test("ships the GitHub Pages export and social assets", async () => {
 
   assert.match(cssBlock(css, "html {"), /scroll-padding-top:\s*var\(--section-offset\)/);
   assert.match(cssBlock(css, "html {"), /scroll-behavior:\s*auto/);
-  for (const id of ["home", "research", "awards", "life"]) {
+  for (const id of ["home", "research", "project", "awards", "life"]) {
     assert.doesNotMatch(cssRulesForSelector(css, `#${id}`).join("\n"), /scroll-margin(?:-top|-block(?:-start)?)?\s*:/);
   }
 
@@ -344,15 +357,21 @@ test("ships the GitHub Pages export and social assets", async () => {
     switcher.match(/const sections = \[[\s\S]*?\] as const;/)?.[0] ?? "";
   assert.match(sectionSource, /id:\s*"home"/);
   assert.match(sectionSource, /id:\s*"research"/);
+  assert.match(sectionSource, /id:\s*"project"/);
   assert.match(sectionSource, /id:\s*"awards"/);
   assert.match(sectionSource, /id:\s*"life"/);
-  assert.equal(sectionSource.match(/id:\s*"/g)?.length, 4);
+  assert.equal(sectionSource.match(/id:\s*"/g)?.length, 5);
+  assert.match(switcher, /"--section-count": sections\.length/);
   assert.ok(
     sectionSource.indexOf('id: "home"') <
       sectionSource.indexOf('id: "research"'),
   );
   assert.ok(
     sectionSource.indexOf('id: "research"') <
+      sectionSource.indexOf('id: "project"'),
+  );
+  assert.ok(
+    sectionSource.indexOf('id: "project"') <
       sectionSource.indexOf('id: "awards"'),
   );
   assert.ok(
@@ -391,6 +410,10 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.equal(page.match(/awards:\s*"奖项"/g)?.length, 1);
   assert.equal(page.match(/life:\s*"Life"/g)?.length, 1);
   assert.equal(page.match(/life:\s*"生活"/g)?.length, 1);
+  assert.equal(page.match(/project:\s*"Project"/g)?.length, 1);
+  assert.equal(page.match(/project:\s*"项目"/g)?.length, 1);
+  assert.match(page, /projectDemo:\s*"在线使用"/);
+  assert.match(page, /projectCode:\s*"项目源码"/);
   assert.match(page, /awardsListLabel:\s*"Awards in reverse chronological order"/);
   assert.match(page, /awardsListLabel:\s*"按时间倒序排列的奖项"/);
   assert.match(page, /何天成/);
@@ -460,6 +483,8 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(layout, /何天成/);
 
   await Promise.all([
+    access(new URL("../out/images/project-hot100-preview.jpg", import.meta.url)),
+    access(new URL("../docs/images/project-hot100-preview.jpg", import.meta.url)),
     access(new URL("../out/.nojekyll", import.meta.url)),
     access(new URL("../out/avatar.png", import.meta.url)),
     access(new URL("../out/og-scientist.png", import.meta.url)),
