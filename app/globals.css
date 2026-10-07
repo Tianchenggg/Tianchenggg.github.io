@@ -103,8 +103,6 @@ img {
   pointer-events: none;
 }
 
-.nav-glass-optics { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
-
 .site-header-layout {
   display: grid;
   grid-template-columns: minmax(72px, 1fr) minmax(0, 640px) minmax(72px, 1fr);
@@ -182,13 +180,13 @@ img {
     inset 0 -1px 1px rgb(51 73 104 / 0.14),
     0 2px 5px rgb(23 44 74 / 0.06),
     0 12px 30px -8px rgb(23 44 74 / 0.18);
-  -webkit-backdrop-filter: blur(8px) saturate(140%);
-  backdrop-filter: blur(8px) saturate(140%);
   pointer-events: auto;
   isolation: isolate;
 }
 
 .site-header-inner::before {
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  backdrop-filter: blur(8px) saturate(140%);
   position: absolute;
   z-index: 0;
   inset: 0;
@@ -201,16 +199,6 @@ img {
     inset -1px -1px 0 rgb(255 255 255 / 0.36);
   content: "";
   pointer-events: none;
-}
-
-/* Progressive desktop-only lensing. Mobile retains one inexpensive blur;
-   neither the labels nor the moving selection get a second backdrop filter. */
-@supports (backdrop-filter: url("#nav-refraction")) {
-  @media (min-width: 701px) and (hover: hover) {
-    .site-header-inner {
-      backdrop-filter: url("#nav-refraction") blur(5px) saturate(140%);
-    }
-  }
 }
 
 .site-header-inner > * {
@@ -326,18 +314,8 @@ img {
 .section-switcher.is-dragging a[data-preview="false"] { color: var(--muted); }
 .section-switcher.is-dragging a[data-preview="true"] { color: var(--ink-strong); }
 
-.section-switcher a > span {
-  transform: translateZ(0) scale(1);
-  transform-origin: center;
-  transition: transform 170ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
 .section-switcher a[aria-current="location"] {
   color: var(--ink-strong);
-}
-
-.section-switcher a[aria-current="location"] > span {
-  transform: translateZ(0) scale(1.018);
 }
 
 .section-switcher a:not([aria-current="location"]):hover {
@@ -372,43 +350,6 @@ img {
   position: relative;
   z-index: 1;
   min-height: 100vh;
-  overflow: clip;
-}
-
-.page-spectrum {
-  position: fixed;
-  z-index: 0;
-  inset: 0;
-  overflow: hidden;
-  contain: strict;
-  pointer-events: none;
-  opacity: 0.24;
-}
-
-.page-spectrum .fluid-color { inset: -8%; }
-
-.portfolio-shell::before,
-.portfolio-shell::after {
-  position: absolute;
-  border-radius: 999px;
-  content: "";
-  pointer-events: none;
-}
-
-.portfolio-shell::before {
-  top: 31rem;
-  left: -13rem;
-  width: 28rem;
-  height: 28rem;
-  background: radial-gradient(circle, rgb(111 190 255 / 0.11), transparent 68%);
-}
-
-.portfolio-shell::after {
-  right: -16rem;
-  bottom: 8rem;
-  width: 34rem;
-  height: 34rem;
-  background: radial-gradient(circle, rgb(127 109 244 / 0.1), transparent 68%);
 }
 
 .section-pad {
@@ -436,7 +377,7 @@ img {
 .hero-spectrum {
   position: absolute;
   z-index: -1;
-  inset: -8% -10% -6%;
+  inset: 0;
   overflow: hidden;
   pointer-events: none;
   contain: strict;
@@ -444,7 +385,7 @@ img {
   mask-image: radial-gradient(ellipse, #000 22%, rgb(0 0 0 / 0.8) 48%, transparent 74%);
 }
 
-.hero-spectrum .fluid-color { inset: -12% -8%; }
+.hero-spectrum .fluid-field { inset: -8%; }
 
 /* Keep the reading surface calm while the colors move freely underneath. */
 .hero-spectrum::after {
@@ -583,7 +524,6 @@ img {
 
 @media (forced-colors: active) {
   .creativity-spectrum { background: none; color: CanvasText; }
-  .page-spectrum,
   .hero-spectrum { display: none; }
 }
 
@@ -913,40 +853,33 @@ img {
   inset: 0;
   overflow: hidden;
   border-radius: inherit;
-  contain: strict;
+  contain: paint;
   pointer-events: none;
-  background: #f2edf9;
 }
 
-/* Rasterized color fields move independently on the compositor. No animated
-   blur, filters, layout, or per-frame JavaScript on the scrolling thread. */
-.fluid-color {
+/* Color always exists in the base paint, even before JS, offscreen, or paused.
+   One bounded gradient plane replaces four oversized, permanently promoted layers. */
+.card-fluid,
+.hero-spectrum {
+  background:
+    radial-gradient(ellipse at 92% 18%, rgb(143 117 230 / 0.65), transparent 65%),
+    radial-gradient(ellipse at 60% 96%, rgb(248 184 86 / 0.55), transparent 60%),
+    radial-gradient(ellipse at 12% 24%, rgb(97 206 221 / 0.5), transparent 62%),
+    #f5eef9;
+}
+
+.fluid-field {
   position: absolute;
-  inset: -45% -15%;
-  transform-origin: center;
+  inset: -10%;
+  background:
+    radial-gradient(ellipse at 78% 18%, #9580eb, transparent 58%),
+    radial-gradient(ellipse at 18% 65%, #74cdda, transparent 55%),
+    radial-gradient(ellipse at 54% 90%, #f4b55e, transparent 57%),
+    radial-gradient(ellipse at 62% 45%, #ee91b6, transparent 65%);
+  transform: none;
 }
 
-.fluid-color.is-gold {
-  background: radial-gradient(ellipse at 50% 50%, #ffc04c 0%, rgb(255 163 78 / 0.92) 18%, rgb(255 192 76 / 0.48) 36%, transparent 65%);
-  transform: translate3d(22%, 16%, 0) rotate(-24deg) scale(1.1, 0.8);
-}
-
-.fluid-color.is-rose {
-  background: radial-gradient(ellipse at 50% 50%, rgb(239 93 140 / 0.9) 0%, rgb(245 130 158 / 0.8) 22%, rgb(244 133 172 / 0.35) 42%, transparent 65%);
-  transform: translate3d(-24%, -22%, 0) rotate(32deg) scale(0.9, 0.85);
-}
-
-.fluid-color.is-violet {
-  background: radial-gradient(ellipse at 50% 50%, rgb(133 102 236 / 0.92) 0%, rgb(143 130 243 / 0.72) 24%, rgb(168 157 240 / 0.25) 45%, transparent 66%);
-  transform: translate3d(28%, -20%, 0) rotate(-18deg) scale(0.9, 0.88);
-}
-
-.fluid-color.is-cyan {
-  background: radial-gradient(ellipse at 50% 50%, rgb(76 204 219 / 0.8) 0%, rgb(114 220 219 / 0.6) 23%, rgb(137 224 221 / 0.2) 44%, transparent 65%);
-  transform: translate3d(-26%, 24%, 0) rotate(28deg) scale(1.05, 0.8);
-}
-
-/* This stationary veil, not the moving colors, determines text contrast. */
+/* Keep contrast independent of the animation and visible throughout its cycle. */
 .card-fluid::after {
   position: absolute;
   inset: 0;
@@ -954,52 +887,25 @@ img {
   content: "";
 }
 
-@keyframes fluid-gold {
-  0%, 100% { transform: translate3d(22%, 16%, 0) rotate(-24deg) scale(1.1, 0.8); }
-  33% { transform: translate3d(-16%, -22%, 0) rotate(22deg) scale(0.85, 1.15); }
-  66% { transform: translate3d(-30%, 18%, 0) rotate(48deg) scale(1.15, 0.85); }
-}
-
-@keyframes fluid-rose {
-  0%, 100% { transform: translate3d(-24%, -22%, 0) rotate(32deg) scale(0.9, 0.85); }
-  33% { transform: translate3d(24%, 18%, 0) rotate(-16deg) scale(1.2, 0.8); }
-  66% { transform: translate3d(10%, -24%, 0) rotate(-42deg) scale(0.8, 1.1); }
-}
-
-@keyframes fluid-violet {
-  0%, 100% { transform: translate3d(28%, -20%, 0) rotate(-18deg) scale(0.9, 0.88); }
-  33% { transform: translate3d(-28%, 18%, 0) rotate(40deg) scale(1.2, 0.82); }
-  66% { transform: translate3d(6%, 26%, 0) rotate(-28deg) scale(0.85, 1.2); }
-}
-
-@keyframes fluid-cyan {
-  0%, 100% { transform: translate3d(-26%, 24%, 0) rotate(28deg) scale(1.05, 0.8); }
-  33% { transform: translate3d(28%, -18%, 0) rotate(-28deg) scale(0.85, 1.15); }
-  66% { transform: translate3d(-10%, -26%, 0) rotate(18deg) scale(1.2, 0.85); }
+@keyframes fluid-drift {
+  0%, 100% { transform: translate3d(-5%, -3%, 0) scale(1.04); }
+  35% { transform: translate3d(5%, 4%, 0) scale(1.08); }
+  70% { transform: translate3d(-3%, 5%, 0) scale(1.02); }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .fluid-color {
-    animation: fluid-gold 14s ease-in-out infinite;
+  /* Only nearby fields own an animation. Offscreen fields return to plain paint;
+     user pause freezes visible fields instead of resetting their position. */
+  [data-ambient][data-visible="true"] > .fluid-field {
+    animation: fluid-drift 16s ease-in-out infinite;
     animation-delay: var(--fluid-phase, -3s);
     animation-play-state: paused;
   }
-
-  .fluid-color.is-rose { animation-name: fluid-rose; animation-duration: 17s; }
-  .fluid-color.is-violet { animation-name: fluid-violet; animation-duration: 19s; }
-  .fluid-color.is-cyan { animation-name: fluid-cyan; animation-duration: 13s; }
+  [data-ambient][data-visible="true"][data-running="true"] > .fluid-field {
+    animation-play-state: running;
+  }
   .publication-card:nth-child(even) { --fluid-phase: -9s; }
-  .hero-spectrum .fluid-color { animation-duration: 11s; --fluid-phase: -4s; }
-  .hero-spectrum .fluid-color.is-rose { animation-duration: 13s; }
-  .hero-spectrum .fluid-color.is-violet { animation-duration: 15s; }
-  .hero-spectrum .fluid-color.is-cyan { animation-duration: 10s; }
-  .page-spectrum .fluid-color { animation-duration: 23s; --fluid-phase: -11s; }
-  .page-spectrum .fluid-color.is-rose { animation-duration: 27s; }
-  .page-spectrum .fluid-color.is-violet { animation-duration: 29s; }
-  .page-spectrum .fluid-color.is-cyan { animation-duration: 21s; }
-  .card-fluid[data-running="true"] .fluid-color,
-  .hero-spectrum[data-running="true"] .fluid-color,
-  .page-spectrum[data-running="true"] .fluid-color { animation-play-state: running; }
+  .hero-spectrum { --fluid-phase: -5s; }
 }
 
 .publication-visual {
@@ -1557,8 +1463,6 @@ a:focus-visible .link-arrow {
     width: 100%;
     padding: 5px;
     border-radius: 30px;
-    -webkit-backdrop-filter: blur(8px) saturate(140%);
-    backdrop-filter: blur(8px) saturate(140%);
   }
 
   .section-switcher {
@@ -1629,14 +1533,8 @@ a:focus-visible .link-arrow {
   }
 
   .hero-spectrum {
-    inset: -2% -16% 0%;
     opacity: 0.76;
   }
-
-  .page-spectrum { opacity: 0.18; }
-  .page-spectrum .fluid-color { inset: 0; }
-  .page-spectrum .is-rose,
-  .page-spectrum .is-violet { display: none; }
 
   .spectrum-toggle {
     grid-column: 2;
@@ -1809,7 +1707,7 @@ a:focus-visible .link-arrow {
     background: rgb(244 248 252 / 0.94);
   }
 
-  .site-header-inner {
+  .site-header-inner::before {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }

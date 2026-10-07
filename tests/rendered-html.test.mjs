@@ -97,25 +97,20 @@ test("server-renders the finished research portfolio", async t => {
   assert.match(headerMarkup, /<button\b[^>]*class="spectrum-toggle"[^>]*aria-label="Pause background motion"/);
   assert.equal(html.match(/class="spectrum-toggle"/g)?.length, 1, "A single header control must pause all ambient motion");
   const ambientMarkup = [...html.matchAll(/<[^>]+\bdata-ambient(?:="[^"]*")?[^>]*>/g)].map(([element]) => element);
-  assert.equal(ambientMarkup.length, 11, "Page, hero, publications, and awards must share ambient-motion control");
+  assert.equal(ambientMarkup.length, 10, "Hero, publications, and awards share control without a full-viewport animation");
   for (const element of ambientMarkup) {
     assert.match(element, /data-running="false"/, "Ambient motion must wait for visibility before starting");
+    assert.match(element, /data-visible="false"/, "Offscreen animation layers must not be allocated before visibility is known");
     assert.match(element, /aria-hidden="true"/, "Decorative motion must not enter the accessibility tree");
   }
   const fluidMarkup = [...html.matchAll(/<div class="card-fluid"[^>]*>[\s\S]*?<\/div>/g)].map(([element]) => element);
   assert.equal(fluidMarkup.length, 9, "Each publication and award row must have a shared fluid backdrop");
-  const pageBackdrop = html.match(/<div class="page-spectrum"[^>]*>[\s\S]*?<\/div>/)?.[0] ?? "";
   const heroBackdrop = html.match(/<div class="hero-spectrum"[^>]*>[\s\S]*?<\/div>/)?.[0] ?? "";
-  assert.ok(pageBackdrop, "The overall page must have one decorative flowing backdrop");
   assert.ok(heroBackdrop, "Home must have its own composed color fields");
-  assert.equal(html.match(/class="page-spectrum"/g)?.length, 1);
+  assert.doesNotMatch(html, /page-spectrum|nav-refraction|feDisplacementMap/);
   assert.equal(html.match(/class="hero-spectrum"/g)?.length, 1);
-  assert.ok(html.indexOf(pageBackdrop) < html.indexOf(headerMarkup), "The page backdrop must not be nested inside the navigation");
-  for (const backdrop of [...fluidMarkup, pageBackdrop, heroBackdrop]) {
-    for (const color of ["gold", "rose", "violet", "cyan"]) {
-      assert.match(backdrop, new RegExp(`<span class="fluid-color is-${color}"></span>`));
-    }
-    assert.equal(backdrop.match(/class="fluid-color /g)?.length, 4);
+  for (const backdrop of [...fluidMarkup, heroBackdrop]) {
+    assert.equal(backdrop.match(/class="fluid-field"/g)?.length, 1);
     assert.doesNotMatch(backdrop, /<(?:canvas|video|img)\b/, "Fluid colors must not add media downloads or a canvas render loop");
   }
   assert.match(html, />AI Scientist</);
@@ -274,7 +269,8 @@ test("ships the GitHub Pages export and social assets", async () => {
     readFile(new URL("../docs/index.html", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    Promise.all(["page.tsx", "language.ts", "site-header.tsx", "portfolio-content.ts", "portfolio-sections.tsx"].map(file =>
+      readFile(new URL(`../app/${file}`, import.meta.url), "utf8"))).then(parts => parts.join("\n")),
     readFile(new URL("../app/section-switcher.tsx", import.meta.url), "utf8"),
   ]);
 
@@ -383,7 +379,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(switcher, /aria-label=\{ariaLabel\}/);
   assert.doesNotMatch(switcher, /--lens-light-x/);
   assert.doesNotMatch(switcher, /section-switcher-lens-labels|--drag-label-x/);
-  assert.match(cssBlock(css, ".site-header-inner {"), /backdrop-filter:\s*blur\([\d.]+px\)\s+saturate\([\d.]+%?\)/);
+  assert.match(cssBlock(css, ".site-header-inner::before {"), /backdrop-filter:\s*blur\([\d.]+px\)\s+saturate\([\d.]+%?\)/);
   assert.match(css, /cubic-bezier\(0\.22,\s*1,\s*0\.36,\s*1\)/);
   assert.doesNotMatch(css, /font-weight\s+170ms/);
   assert.doesNotMatch(css, /--lens-light-x/);
@@ -400,7 +396,7 @@ test("ships the GitHub Pages export and social assets", async () => {
   assert.match(page, /window\.localStorage\.getItem\(LANGUAGE_STORAGE_KEY\)/);
   assert.match(page, /window\.localStorage\.setItem\(LANGUAGE_STORAGE_KEY, language\)/);
   assert.match(page, /document\.documentElement\.lang\s*=\s*language === "zh" \? "zh-CN" : "en"/);
-  assert.match(page, /document\.title\s*=\s*copy\.documentTitle/);
+  assert.match(page, /document\.title\s*=\s*siteCopy\[language\]\.documentTitle/);
   assert.match(page, /onClick=\{\(\) => setLanguagePreference\(nextLanguage\)\}/);
   assert.match(page, /switchLanguage:\s*"切换为英文"/);
   assert.match(page, /wechat:\s*"WeChat"/);

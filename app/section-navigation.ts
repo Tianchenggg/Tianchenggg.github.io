@@ -1,4 +1,5 @@
-import { clampScrollTarget, resolveActiveSection, resolveDragIndex } from "./navigation-math.ts";
+import { attachSectionDrag } from "./section-drag.ts";
+import { clampScrollTarget, resolveActiveSection } from "./navigation-math.ts";
 
 /** Native scrolling owns the motion; this controller only tracks user intent. */
 export function attachSectionNavigation(nav: HTMLElement, ids: readonly string[], onActive: (index: number) => void) {
@@ -10,13 +11,10 @@ export function attachSectionNavigation(nav: HTMLElement, ids: readonly string[]
   let pageHeight = 0;
   let viewportHeight = 0;
   let frame = 0;
-  let dragFrame = 0;
   let idleTimer = 0;
   let disposed = false;
-  let suppressClick = false;
   let pending: { index: number; y: number; ownsScroll: boolean } | null = null;
   let settled: { index: number; y: number } | null = null;
-  let drag: { id: number; startX: number; startY: number; x: number; origin: number; width: number; moved: boolean } | null = null;
 
   const commit = (index: number) => {
     if (index === active) return;
@@ -31,7 +29,7 @@ export function attachSectionNavigation(nav: HTMLElement, ids: readonly string[]
   };
   const targetY = (index: number) => clampScrollTarget(tops[index], offset, pageHeight - viewportHeight);
   const reconcile = () => {
-    if (disposed || pending || drag?.moved) return;
+    if (disposed || pending || drag.isDragging) return;
     // Short sections can share the same clamped bottom scroll target.
     if (settled && Math.abs(window.scrollY - settled.y) <= 2) return;
     settled = null;
@@ -79,8 +77,7 @@ export function attachSectionNavigation(nav: HTMLElement, ids: readonly string[]
     else schedule();
   };
   const onClick = (event: MouseEvent) => {
-    if (suppressClick && event.detail !== 0) {
-      suppressClick = false;
+    if (drag.consumeClick(event.detail)) {
       event.preventDefault();
       return;
     }
@@ -91,77 +88,20 @@ export function attachSectionNavigation(nav: HTMLElement, ids: readonly string[]
     event.preventDefault();
     navigate(index);
   };
-  const paintDrag = () => {
-    dragFrame = 0;
-    if (!drag?.moved) return;
-    nav.style.setProperty("--drag-x", `${drag.x}px`);
-    const preview = resolveDragIndex(drag.x, drag.width, ids.length);
-    anchors.forEach((anchor, index) => { anchor.dataset.preview = String(index === preview); });
-  };
-  const endDrag = (navigateToTarget: boolean) => {
-    const gesture = drag;
-    if (!gesture) return;
-    drag = null;
-    window.cancelAnimationFrame(dragFrame);
-    dragFrame = 0;
-    nav.classList.remove("is-dragging");
-    anchors.forEach(anchor => { delete anchor.dataset.preview; });
-    if (nav.hasPointerCapture(gesture.id)) nav.releasePointerCapture(gesture.id);
-    if (!gesture.moved) return;
-    suppressClick = true;
-    if (navigateToTarget) {
-      const index = resolveDragIndex(gesture.x, gesture.width, ids.length);
-      navigate(index);
-      anchors[index]?.focus({ preventScroll: true });
-    } else { interrupt(); reconcile(); }
-  };
-  const onPointerDown = (event: PointerEvent) => {
-    suppressClick = false;
-    if (!event.isPrimary || event.button !== 0 || drag || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    const anchor = (event.target as Element).closest("a");
-    if (anchor !== anchors[active]) return;
-    const width = nav.getBoundingClientRect().width / ids.length;
-    const thumb = nav.querySelector<HTMLElement>(".section-switcher-thumb");
-    let origin = active * width;
-    const transform = thumb && getComputedStyle(thumb).transform;
-    if (transform && transform !== "none") {
-      try { origin = new DOMMatrixReadOnly(transform).m41; } catch { /* Use the committed segment if a browser cannot parse its matrix. */ }
-    }
-    drag = { id: event.pointerId, startX: event.clientX, startY: event.clientY, x: origin, origin, width, moved: false };
-  };
-  const onPointerMove = (event: PointerEvent) => {
-    if (!drag || drag.id !== event.pointerId) return;
-    const dx = event.clientX - drag.startX;
-    const dy = event.clientY - drag.startY;
-    if (!drag.moved) {
-      if (Math.abs(dy) > Math.max(5, Math.abs(dx))) { endDrag(false); return; }
-      if (Math.abs(dx) < 5) return;
-      drag.moved = true;
-      interrupt(false);
-      nav.style.setProperty("--drag-x", `${drag.origin}px`);
-      nav.classList.add("is-dragging");
-      nav.setPointerCapture(event.pointerId);
-    }
-    drag.x = Math.max(0, Math.min((ids.length - 1) * drag.width, drag.origin + dx));
-    if (!dragFrame) dragFrame = window.requestAnimationFrame(paintDrag);
-    event.preventDefault();
-  };
-  const onPointerUp = (event: PointerEvent) => { if (event.pointerId === drag?.id) endDrag(true); };
-  const onPointerCancel = (event: PointerEvent) => { if (event.pointerId === drag?.id) endDrag(false); };
   const onIntent = () => { if (pending || settled) interrupt(); };
   const onOutsidePointer = (event: PointerEvent) => { if (pending && !nav.contains(event.target as Node)) interrupt(); };
   const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "Escape") { endDrag(false); interrupt(); return; }
+    if (event.key === "Escape") { drag.cancel(); interrupt(); return; }
     if ((event.target as Element).closest?.("input, textarea, select, [contenteditable=true]")) return;
     if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) interrupt();
   };
-  const onBlur = () => { endDrag(false); interrupt(); };
-  const onResize = () => { endDrag(false); interrupt(); measure(); schedule(); };
+  const onBlur = () => { drag.cancel(); interrupt(); };
+  const onResize = () => { drag.cancel(); onLayout(); };
   const onHashChange = () => {
     window.clearTimeout(idleTimer);
     pending = null;
     settled = null;
-    endDrag(false);
+    drag.cancel();
     measure();
     const index = ids.indexOf(window.location.hash.slice(1));
     if (index < 0) { interrupt(); return; }
@@ -179,6 +119,12 @@ export function attachSectionNavigation(nav: HTMLElement, ids: readonly string[]
   };
   const onMotionPreference = () => { if (motion.matches && pending?.ownsScroll) window.scrollTo({ top: pending.y, behavior: "instant" }); };
 
+  const drag = attachSectionDrag(nav, anchors, {
+    getActive: () => active,
+    onStart: () => interrupt(false),
+    onCommit: navigate,
+    onCancel: () => { interrupt(); reconcile(); },
+  });
   measure();
   const initial = ids.indexOf(window.location.hash.slice(1));
   if (initial >= 0) {
@@ -200,25 +146,19 @@ export function attachSectionNavigation(nav: HTMLElement, ids: readonly string[]
   listen(window, "wheel", onIntent, { passive: true });
   listen(window, "touchstart", onIntent, { passive: true });
   listen(window, "pointerdown", onOutsidePointer);
-  listen(window, "pointerup", onPointerUp);
-  listen(window, "pointercancel", onPointerCancel);
   listen(window, "keydown", onKeyDown);
   listen(window, "blur", onBlur);
   listen(window, "resize", onResize);
   listen(window, "hashchange", onHashChange);
   listen(nav, "click", onClick);
-  listen(nav, "pointerdown", onPointerDown);
-  listen(window, "pointermove", onPointerMove);
-  listen(nav, "lostpointercapture", onPointerCancel);
   motion.addEventListener("change", onMotionPreference);
   return () => {
     disposed = true;
-    endDrag(false);
+    drag.dispose();
     cleanup.forEach(remove => remove());
     observer.disconnect();
     motion.removeEventListener("change", onMotionPreference);
     window.clearTimeout(idleTimer);
     window.cancelAnimationFrame(frame);
-    window.cancelAnimationFrame(dragFrame);
   };
 }

@@ -77,14 +77,14 @@ test("navigation has a larger centered desktop layout and readable touch targets
 
 test("glass uses one bounded backdrop layer, specular edges, and accessible opaque fallbacks", () => {
   const outerGlass = rulesFor(".site-header-inner")[0];
-  assert.match(outerGlass, /backdrop-filter:\s*blur\([\d.]+px\)\s+saturate\([\d.]+%?\)/);
+  assert.match(rulesFor(".site-header-inner::before")[0], /backdrop-filter:\s*blur\([\d.]+px\)\s+saturate\([\d.]+%?\)/);
   assert.match(outerGlass, /border-radius:/);
   assert.match(outerGlass, /box-shadow:[^;]*\binset\b/s);
   assert.match(rulesFor(".site-header-inner::before").join("\n"), /background:[^;]*(?:radial|linear)-gradient\(/s);
   for (const [, selectors, declarations] of css.matchAll(/([^{}]+)\{([^{}]*)}/g)) {
     for (const [, backdrop] of declarations.matchAll(/(?:^|;)\s*(?:-webkit-)?backdrop-filter\s*:\s*([^;]+);/g)) {
       if (backdrop.trim() === "none") continue;
-      assert.equal(selectors.trim(), ".site-header-inner",
+      assert.equal(selectors.trim(), ".site-header-inner::before",
         "Only the bounded header shell should blur the page; the thumb and full-width header must not blur again");
     }
   }
@@ -95,7 +95,7 @@ test("glass uses one bounded backdrop layer, specular edges, and accessible opaq
   assert.doesNotMatch(css, /section-switcher-lens-labels|--drag-label-x/,
     "The glass treatment must not duplicate navigation labels");
   const opaque = blockAt("@media (prefers-reduced-transparency: reduce)").body;
-  assert.match(rulesFor(".site-header-inner", opaque).join("\n"), /backdrop-filter:\s*none/);
+  assert.match(rulesFor(".site-header-inner::before", opaque).join("\n"), /backdrop-filter:\s*none/);
   assert.match(rulesFor(".site-header-inner", opaque).join("\n"), /background:/);
   const contrast = blockAt("@media (prefers-contrast: more)").body;
   assert.match(rulesFor(".section-switcher-thumb", contrast).join("\n"), /border-color:/);
@@ -169,70 +169,39 @@ test("Queen Mary crown stays contained at desktop and mobile sizes without CSS c
   assert.match(rulesFor(".award-icon.is-qmul img", narrow).join("\n"), /width:\s*44px\s*;/);
 });
 
-test("fluid colors follow independent, visibly flowing compositor-only paths", () => {
-  const paths = [];
-  for (const color of ["gold", "rose", "violet", "cyan"]) {
-    const frames = blockAt(`@keyframes fluid-${color}`).body;
-    const properties = [...new Set([...frames.matchAll(/\b([a-z-]+)\s*:/gi)].map(([, property]) => property))];
-    assert.deepEqual(properties, ["transform"], "Background motion must not animate layout, blur, filters, or gradients");
-    const transforms = [...frames.matchAll(/transform:\s*([^;]+);/g)].map(([, value]) => value);
-    assert.ok(new Set(transforms).size >= 3, "Fluid colors need multiple distinct positions along their paths");
-    const translations = [...frames.matchAll(/translate3d\((-?[\d.]+)%,\s*(-?[\d.]+)%,\s*0\)/g)]
-      .map(([, x, y]) => [Number(x), Number(y)]);
-    for (const axis of [0, 1]) {
-      const values = translations.map(point => point[axis]);
-      assert.ok(Math.max(...values) - Math.min(...values) >= 30, "Color fields must visibly travel, not remain nearly static");
-    }
-    paths.push(transforms.join(";"));
-    const colorRule = rulesFor(`.fluid-color.is-${color}`).join("\n");
-    assert.match(colorRule, /background:\s*radial-gradient\(/, "Each color needs a prepainted gradient field");
-    assert.match(colorRule, /transform:\s*translate3d\(/, "Reduced-motion users must still get a composed static color field");
-  }
-  assert.equal(new Set(paths).size, 4, "Colors must not drift in lockstep");
+test("ambient gradients share one bounded, compositor-only animation per surface", () => {
+  const frames = blockAt("@keyframes fluid-drift").body;
+  const properties = [...new Set([...frames.matchAll(/\b([a-z-]+)\s*:/gi)].map(([, property]) => property))];
+  assert.deepEqual(properties, ["transform"]);
+  const field = rulesFor(".fluid-field").join("\n");
+  assert.equal((field.match(/radial-gradient\(/g) ?? []).length, 4, "Keep all four colors in a single prepainted plane");
+  assert.match(field, /inset:\s*-10%/);
+  assert.match(field, /transform:\s*none/);
+  assert.doesNotMatch(field, /will-change|translate3d/);
+  assert.doesNotMatch(css, /fluid-gold|fluid-rose|fluid-violet|fluid-cyan|page-spectrum|nav-refraction/);
 });
 
-test("fluid animation is opt-in to motion preference and gated by the shared controller", () => {
-  const motionBlocks = [...css.matchAll(/@media\s*\(prefers-reduced-motion:\s*no-preference\)/g)]
-    .map(match => blockAt(match[0], match.index));
-  assert.ok(motionBlocks.length);
-  const permitted = motionBlocks.map(block => block.body).join("\n");
-  let outside = css;
-  for (const block of motionBlocks.toReversed()) outside = outside.slice(0, block.start) + outside.slice(block.end);
-  for (const selector of [".fluid-color", ...["gold", "rose", "violet", "cyan"].map(color => `.fluid-color.is-${color}`)]) {
-    assert.doesNotMatch(rulesFor(selector, outside).join("\n"), /\banimation(?:-name)?\s*:/,
-      "Reduced-motion users must not receive ambient animations");
-  }
-  const animatedFields = rulesFor(".fluid-color", permitted).join("\n");
-  assert.match(animatedFields, /animation:\s*fluid-gold\b[^;]*\binfinite/);
-  assert.match(animatedFields, /animation-play-state:\s*paused/);
-  for (const surface of ["card-fluid", "hero-spectrum", "page-spectrum"]) {
-    assert.match(rulesFor(`.${surface}[data-running="true"] .fluid-color`, permitted).join("\n"),
-      /animation-play-state:\s*running/, `${surface} must use the shared pause state`);
-  }
-});
-
-test("the hero and page flow behind stationary content without animating expensive effects", () => {
-  for (const surface of ["hero-spectrum", "page-spectrum"]) {
-    const rules = rulesFor(`.${surface}`).join("\n");
-    assert.match(rules, /overflow:\s*hidden/);
-    assert.match(rules, /contain:\s*strict/);
+test("only nearby ambient surfaces allocate animations; pause preserves visible frames", () => {
+  const permitted = blockAt("@media (prefers-reduced-motion: no-preference)").body;
+  const allocation = rulesFor('[data-ambient][data-visible="true"] > .fluid-field', permitted).join("\n");
+  assert.match(allocation, /animation:\s*fluid-drift/);
+  assert.match(allocation, /animation-play-state:\s*paused/);
+  assert.match(rulesFor('[data-ambient][data-visible="true"][data-running="true"] > .fluid-field', permitted).join("\n"), /animation-play-state:\s*running/);
+  assert.doesNotMatch(rulesFor(".fluid-field").join("\n"), /\banimation(?:-name)?\s*:/);
+  for (const selector of [".card-fluid", ".hero-spectrum"]) {
+    const rules = rulesFor(selector).join("\n");
+    assert.match(rules, /background:[^;]*radial-gradient/s, "Every surface keeps static fallback colors regardless of observer state");
     assert.match(rules, /pointer-events:\s*none/);
-    assert.doesNotMatch(rules, /\b(?:animation|animation-name|filter|backdrop-filter)\s*:/,
-      "Only the contained color fields should animate, not the full viewport layer");
-    assert.doesNotMatch(rulesFor(`.${surface} .fluid-color`).join("\n"), /\b(?:filter|backdrop-filter)\s*:/);
+    assert.doesNotMatch(rules, /\b(?:animation|animation-name|filter|backdrop-filter)\s*:/);
   }
-  assert.match(rulesFor(".page-spectrum").join("\n"), /position:\s*fixed/);
-  assert.match(rulesFor(".page-spectrum").join("\n"), /inset:\s*0\s*;/);
-  assert.match(rulesFor(".page-spectrum").join("\n"), /z-index:\s*0/);
-  assert.match(rulesFor(".portfolio-shell").join("\n"), /z-index:\s*1/);
-  assert.match(rulesFor(".hero-spectrum").join("\n"), /position:\s*absolute/);
-  assert.match(rulesFor(".hero-spectrum").join("\n"), /z-index:\s*-1/);
-  const veil = rulesFor(".hero-spectrum::after").join("\n");
-  assert.match(veil, /background:\s*linear-gradient\(/);
-  assert.doesNotMatch(veil, /\banimation(?:-name)?\s*:/, "The hero contrast veil must stay stationary");
-  assert.doesNotMatch(css, /@keyframes\s+spectrum-drift\b/, "The obsolete ring animation must not keep rendering alongside the fluid fields");
-  assert.match(rulesFor(".page-spectrum .is-rose").join("\n"), /display:\s*none/);
-  assert.match(rulesFor(".page-spectrum .is-violet").join("\n"), /display:\s*none/);
+});
+
+test("navigation text is independent of backdrop filtering and layer promotion", () => {
+  assert.doesNotMatch(rulesFor(".site-header-inner").join("\n"), /\b(?:filter|backdrop-filter)\s*:/);
+  assert.doesNotMatch(css, /backdrop-filter:\s*url\(|translateZ\(/);
+  assert.match(rulesFor(".site-header-inner > *").join("\n"), /z-index:\s*1/);
+  assert.match(rulesFor(".site-header-inner::before").join("\n"), /z-index:\s*0/);
+  assert.doesNotMatch(rulesFor(".section-switcher a > span").join("\n"), /transform:/);
 });
 
 test("Creativity has a multicolor treatment with readable browser and forced-color fallbacks", () => {
@@ -253,7 +222,7 @@ test("Creativity has a multicolor treatment with readable browser and forced-col
   const forcedText = rulesFor(".creativity-spectrum", forced).join("\n");
   assert.match(forcedText, /background:\s*none/);
   assert.match(forcedText, /color:\s*CanvasText/);
-  for (const surface of [".hero-spectrum", ".page-spectrum"]) {
+  for (const surface of [".hero-spectrum"]) {
     assert.match(rulesFor(surface, forced).join("\n"), /display:\s*none/);
   }
 });
@@ -262,7 +231,7 @@ test("color motion stays clipped and underneath stationary reading surfaces", ()
   const backdrop = rulesFor(".card-fluid").join("\n");
   assert.match(backdrop, /position:\s*absolute/);
   assert.match(backdrop, /overflow:\s*hidden/);
-  assert.match(backdrop, /contain:\s*strict/);
+  assert.match(backdrop, /contain:\s*paint/);
   assert.match(backdrop, /pointer-events:\s*none/);
   assert.match(backdrop, /z-index:\s*0/);
   for (const selector of [".publication-body", ".award-item time", ".award-icon", ".award-item h3"]) {

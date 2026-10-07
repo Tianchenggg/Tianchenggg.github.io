@@ -6,6 +6,7 @@ import { Window } from "happy-dom";
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import ts from "typescript";
+import { attachAmbientMotion } from "../app/ambient-motion-controller.ts";
 
 // Compile the real client component in memory: Node's type stripper does not
 // support TSX, and exercising React effects catches more than source matching.
@@ -19,7 +20,8 @@ const compiled = ts.transpileModule(source, {
 }).outputText;
 const componentModule = { exports: {} };
 new Function("require", "module", "exports", compiled)(
-  createRequire(import.meta.url), componentModule, componentModule.exports,
+  id => id === "./ambient-motion-controller" ? { attachAmbientMotion } : createRequire(import.meta.url)(id),
+  componentModule, componentModule.exports,
 );
 const AmbientMotionControl = componentModule.exports.default;
 
@@ -244,10 +246,29 @@ test("browsers without IntersectionObserver retain a safe static background", as
   assert.deepEqual(h.running(), []);
 });
 
-test("ambient motion uses event-driven gates rather than a JavaScript render loop", () => {
-  assert.doesNotMatch(source, /\b(?:requestAnimationFrame|setInterval|setTimeout)\s*\(/);
-  assert.doesNotMatch(source, /addEventListener\(\s*["'](?:scroll|wheel|pointermove|mousemove)["']/);
-  assert.doesNotMatch(source, /\b(?:getBoundingClientRect|getComputedStyle)\s*\(/);
+test("ambient motion uses event-driven gates rather than a JavaScript render loop", async () => {
+  const controller = await readFile(new URL("../app/ambient-motion-controller.ts", import.meta.url), "utf8");
+  const behavior = source + controller;
+  assert.doesNotMatch(behavior, /\b(?:requestAnimationFrame|setInterval|setTimeout)\s*\(/);
+  assert.doesNotMatch(behavior, /addEventListener\(\s*["'](?:scroll|wheel|pointermove|mousemove)["']/);
+  assert.doesNotMatch(behavior, /\b(?:getBoundingClientRect|getComputedStyle)\s*\(/);
+});
+
+test("pausing preserves visible surfaces without recreating observers", async t => {
+  const h = await setup(t);
+  h.intersect([1, 2]);
+  const observer = h.observers[0];
+  assert.equal(h.elements[1].dataset.visible, "true");
+  await h.toggle();
+  assert.equal(h.elements[1].dataset.visible, "true", "Pause must freeze, not remove, a visible animation");
+  assert.equal(h.elements[1].dataset.running, "false");
+  await h.toggle();
+  assert.equal(h.elements[1].dataset.running, "true", "Resume must not wait for another intersection callback");
+  assert.equal(h.observers.length, 1);
+  assert.equal(h.observers[0], observer);
+  h.intersect([1], false);
+  assert.equal(h.elements[1].dataset.visible, "false", "Leaving the viewport must release the animation");
+  assert.equal(h.elements[1].dataset.running, "false");
 });
 
 test("opening a photo viewer pauses every ambient layer until all dialogs close", async t => {

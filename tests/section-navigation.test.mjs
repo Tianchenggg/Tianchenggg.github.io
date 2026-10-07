@@ -38,6 +38,17 @@ function setup(t, options = {}) {
   const historyCalls = [];
   const activeChanges = [];
   const observers = [];
+  const moveListeners = new Set();
+  const addWindowListener = win.addEventListener.bind(win);
+  const removeWindowListener = win.removeEventListener.bind(win);
+  win.addEventListener = (type, listener, options) => {
+    if (type === "pointermove") moveListeners.add(listener);
+    addWindowListener(type, listener, options);
+  };
+  win.removeEventListener = (type, listener, options) => {
+    if (type === "pointermove") moveListeners.delete(listener);
+    removeWindowListener(type, listener, options);
+  };
   // happy-dom invokes anchor activation while bubbling; leave actual browsing
   // context navigation outside this harness, as with browser-owned scrolling.
   win.open = () => null;
@@ -187,7 +198,7 @@ function setup(t, options = {}) {
     flushFrames();
   };
   return {
-    win, doc, nav, anchors, geometry, captures, scrollCalls, historyCalls, activeChanges,
+    win, doc, nav, anchors, geometry, captures, scrollCalls, historyCalls, activeChanges, moveListeners,
     get active() { return active; },
     get scrollY() { return scrollY; },
     get timerCount() { return timers.size; },
@@ -490,6 +501,34 @@ test("layout changes invalidate a stale pending target and use new geometry", t 
   assert.deepEqual(h.scrollCalls.at(-1), { top: 700, behavior: "instant" });
   h.click(2);
   assert.deepEqual(h.scrollCalls.at(-1), { top: 2408, behavior: "smooth" });
+});
+
+test("height-only viewport resizing preserves a still-valid smooth-scroll destination", t => {
+  const h = setup(t);
+  h.click(2);
+  h.scroll(700);
+  h.geometry.viewportHeight = 740;
+  h.event("resize");
+  h.flushFrames();
+  assert.equal(h.active, 2);
+  assert.deepEqual(h.scrollCalls, [{ top: 1908, behavior: "smooth" }]);
+  h.scroll(1908, true);
+  assert.equal(h.active, 2);
+});
+
+test("dragging installs pointer movement work only for the active gesture", t => {
+  const h = setup(t);
+  assert.equal(h.moveListeners.size, 0);
+  h.pointer("pointerdown");
+  assert.equal(h.moveListeners.size, 1);
+  h.pointer("pointermove", { clientX: 160 });
+  h.pointer("pointerup", { clientX: 160 });
+  assert.equal(h.moveListeners.size, 0);
+  h.scroll(508, true);
+  h.pointer("pointerdown", { index: 1, clientX: 150 });
+  assert.equal(h.moveListeners.size, 1);
+  h.event("blur");
+  assert.equal(h.moveListeners.size, 0);
 });
 
 test("layout changes invalidate a settled destination that no longer matches its anchor", t => {

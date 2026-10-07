@@ -1,11 +1,8 @@
-/** Independent color fields merge as they move; the reading surface stays still. */
-export default function FluidBackdrop({ variant = "card" }: { variant?: "card" | "hero" | "page" }) {
+/** One prepainted multicolor surface moves behind stationary reading content. */
+export default function FluidBackdrop({ variant = "card" }: { variant?: "card" | "hero" }) {
   return (
-    <div className={variant === "card" ? "card-fluid" : `${variant}-spectrum`} data-ambient="" data-running="false" aria-hidden="true">
-      <span className="fluid-color is-gold" />
-      <span className="fluid-color is-rose" />
-      <span className="fluid-color is-violet" />
-      <span className="fluid-color is-cyan" />
+    <div className={variant === "card" ? "card-fluid" : "hero-spectrum"} data-ambient="" data-visible="false" data-running="false" aria-hidden="true">
+      <span className="fluid-field" />
     </div>
   );
 }
